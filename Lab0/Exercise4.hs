@@ -1,7 +1,8 @@
 module Exercise4 where
 import Lab0
 import Data.List
--- Time spent: 60 min
+
+-- Time spent: 50 min
 
 {-
 Exercise: Create a function which generates a stream of reversible primes below 1000
@@ -12,6 +13,7 @@ Exercise: Create a function which generates a stream of reversible primes below 
     - 'reversal symmetry',
     - 'unique values'
 
+Implemented using the descriptions in the assignment, which I thought were quite straightforward.
 -}
 
 reversibleStream :: [Integer]

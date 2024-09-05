@@ -35,17 +35,17 @@ probs n = do
 reversal :: Integer -> Integer
 reversal = read . reverse . show
 
-rot13 :: [Char] -> [Char]
-rot13 = undefined
+-- rot13 :: [Char] -> [Char]
+-- rot13 = undefined
 
-consecutive101Prime :: Integer
-consecutive101Prime = undefined
+-- consecutive101Prime :: Integer
+-- consecutive101Prime = undefined
 
-euler9 :: Integer
-euler9 = undefined
+-- euler9 :: Integer
+-- euler9 = undefined
 
-euler10 :: Integer
-euler10 = undefined
+-- euler10 :: Integer
+-- euler10 = undefined
 
-euler49 :: Integer
-euler49 = undefined
+-- euler49 :: Integer
+-- euler49 = undefined
