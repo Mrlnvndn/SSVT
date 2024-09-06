@@ -46,7 +46,8 @@ checkLength :: [Char] -> Bool
 checkLength li = length(rot13 li) == length li
 
 checkNonEncoding:: [Char] -> Bool
-checkNonEncoding c = rot13 a where
-    a = not(isAlpha c)
+checkNonEncoding li = [convChar c | c<-li, not(isAlpha c)]
+
+
 
 
