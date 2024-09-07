@@ -11,6 +11,8 @@ import GHC.Read (list)
     Encoding can be undone by reapplying the same Rot process because alphabet = 26 letters 
 
 -}
+
+
 {-
     Here we take every single char from the list to convert it one by one, we first check if the char is lower of uppercase or none of both -> return same char
     The process is the same for upper and lower case
@@ -21,6 +23,12 @@ import GHC.Read (list)
     Before returning the value, it is transformed to a char type.
 
 -}
+
+main :: IO ()
+main = do
+    quickCheck properEncoding
+    quickCheck checkLength
+
 convChar :: Char -> Char
 convChar c 
     | c >= 'a' && c <= 'z' = chr $ ord 'a' + (ord c - ord 'a' + 13) `mod` 26
@@ -40,13 +48,15 @@ rot13 li = map convChar li
     -}
 
 properEncoding :: [Char] -> Bool
-properEncoding li = (rot13 . rot13) li == li
+properEncoding li = (rot13 . rot13) li == li 
+  
 
 checkLength :: [Char] -> Bool
 checkLength li = length(rot13 li) == length li
 
-checkNonEncoding:: [Char] -> Bool
-checkNonEncoding li = [convChar c | c<-li, not(isAlpha c)]
+--checkNonEncoding:: [Char] -> Bool  Not working but trying to get all the non Alphabetical values and check if not encoded
+--checkNonEncoding li = [ rot13 c | c <-li, filter (not(isAlpha c))]
+
 
 
 
