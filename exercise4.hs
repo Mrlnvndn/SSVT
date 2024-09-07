@@ -45,6 +45,10 @@ reversal  = read . reverse . show
 randomNumbGen :: IO Int
 randomNumbGen = randomRIO (0, 10000) 
 
+{-
+    reversalCorectness doen't work properly, trying to figure it out
+-}
+
 reversalCorectness :: [Int] -> Bool
 reversalCorectness li = null [reversal(reversal x) | x <- li, y<- li, x /= y] -- returns true if valid
 
