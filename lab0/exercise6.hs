@@ -40,4 +40,4 @@ isPrime li val  =  val `elem` li
 
 -- we could test the code by checking wether the result is Prime
 checkIfPrime:: Bool
-checkIfPrime = isPrime doList consecutive101Prime 
+checkIfPrime = isPrime doList consecutive101Prime --
