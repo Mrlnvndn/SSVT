@@ -4,7 +4,7 @@ import System.Random
 import Test.QuickCheck
 
 -- Exercise 1
--- Time Spent: 35 min
+-- Time Spent: 70 min
 
 rot13 :: [Char] -> [Char]
 rot13 = map shiftChar
