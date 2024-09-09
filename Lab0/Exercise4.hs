@@ -65,11 +65,14 @@ reversalSymmetryProp = and [reversal x `elem` revs | x <- revs]
 main :: IO()
 main = do
     let primeResult = primeMembership reversibleStream
+    putStrLn "Membership test passed:"
     print primeResult
 
+    putStrLn "Unique test passed:"
     let uniqueResult = uniqueValues reversibleStream
     print uniqueResult
 
+    putStrLn "MaxResult test passed:"
     let maxResult = checkMax reversibleStream
     print maxResult
 

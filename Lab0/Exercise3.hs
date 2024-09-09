@@ -68,11 +68,11 @@ testTriangle (a,b,c) shape = triangle a b c == shape
 -- Main test function
 main :: IO ()
 main = do
-    print (testTriangle (3,1,1) NoTriangle)
-    print (testTriangle (1,1,1) Equilateral)
-    print (testTriangle (2,2,1) Isosceles)
-    print (testTriangle (3,4,5) Rectangular)
-    print (testTriangle (3,4,6) Other)
+    putStrLn $ "Verifying simple NoTriangle. Passed: " ++ show (testTriangle (3,1,1) NoTriangle)
+    putStrLn $ "Verifying simple Equilateral. Passed: " ++ show (testTriangle (3,3,3) Equilateral)
+    putStrLn $ "Verifying simple Isosceles. Passed: " ++ show (testTriangle (2,2,1) Isosceles)
+    putStrLn $ "Verifying simple Rectangular. Passed: " ++ show (testTriangle (3,4,5) Rectangular)
+    putStrLn $ "Verifying simple 'Other'. Passed: " ++ show (testTriangle (3,4,6) Other)
 
     let n = 100
     let testRect = [triangle a b c | (a,b,c) <- genPythagoreanTriples n]

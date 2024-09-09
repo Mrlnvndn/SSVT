@@ -40,4 +40,5 @@ consecutive101Prime :: Integer
 consecutive101Prime = last $ takeWhile (not . prime) neighborSum
 
 main = do 
-    consecutive101Prime
+    putStrLn $ "Looking for smallest 101-consecutive prime sum..."
+    putStrLn $ "Found prime value: " ++ show consecutive101Prime

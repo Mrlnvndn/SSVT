@@ -47,7 +47,7 @@ testProps n = do
     let expected = n `div` 4
     let errSum = sum [abs (expected - x) ^ 2 | x <- [sub1, sub2, sub3, sub4]]
     let stdDiv = sqrt $ fromIntegral errSum / fromIntegral n
-    putStrLn $ "Standard deviation for current test: " ++ show stdDiv
+    -- putStrLn $ "Standard deviation for current test: " ++ show stdDiv
 
     if stdDiv < fromIntegral n * 0.05 then 
         return True
@@ -56,6 +56,7 @@ testProps n = do
 -- main :: IO ()
 main = do
     results <- replicateM 100 (testProps 10000)
-    mapM_ (putStrLn . ("All tests passed: " ++) . show) results
+    mapM_ (putStrLn . ("Test within standard deviation: " ++) . show) results
+    putStrLn "Tests finished"
 
 
