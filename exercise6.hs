@@ -16,7 +16,7 @@ findPrimeSum :: Int -> Integer
 findPrimeSum n =
     let li = doList in
     let sum' = sumList n li in
-        if isPrime(li sum')  then sum'
+        if isPrime li sum'  then sum'
         else findPrimeSum (n+1)
 
 --sums up a consecutive of 101 prime numbers from the prime list by dropping the head of the prime list if end result is not prime
