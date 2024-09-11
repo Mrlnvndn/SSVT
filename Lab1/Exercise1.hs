@@ -30,7 +30,7 @@ genNegativeInt = choose(-10000, -1)
 -- This range seems to be a good range for the test of factorials to not load for too long on my laptop
 genInt :: Gen Integer
 genInt = choose (1, 1000)
-
+--Calling all the quickchecks with custom Number Generator
 main :: IO ()
 main = do
     putStrLn "Check for factorial recursive: "
