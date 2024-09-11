@@ -17,6 +17,9 @@ prop_outputAlwaysBiggerThanZero = forAll randomSingleOrDoubleDigitNumber ( \inpu
 prop_outputAlwaysBiggerOrEqualToInput :: Property
 prop_outputAlwaysBiggerOrEqualToInput = forAll randomSingleOrDoubleDigitNumber ( \input -> factorial input >= input )
 
+prop_factorialRecursiveDefinition :: Property
+prop_factorialRecursiveDefinition = forAll randomSingleOrDoubleDigitNumber (\input -> factorial input == input * factorial (input - 1))
+
 --generating random single numbers
 randomSingleOrDoubleDigitNumber :: Gen Integer
 randomSingleOrDoubleDigitNumber =
@@ -26,3 +29,4 @@ main :: IO ()
 main = do
   quickCheck prop_outputAlwaysBiggerOrEqualToInput
   quickCheck prop_outputAlwaysBiggerThanZero
+  quickCheck prop_factorialRecursiveDefinition
