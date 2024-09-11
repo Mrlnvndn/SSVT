@@ -27,14 +27,14 @@ sumList (x : xs) = x + sumList xs
 
 consecutive101Prime :: Integer
 consecutive101Prime = findPrimeSum 0
+
+findPrimeSum :: Int -> Integer
+findPrimeSum index
+  | isPrime sumOfPrimes = sumOfPrimes
+  | otherwise = findPrimeSum (index + 1)
   where
-    findPrimeSum :: Int -> Integer
-    findPrimeSum x
-      | isPrime sumOfPrimes = sumOfPrimes
-      | otherwise = findPrimeSum (x + 1)
-      where
-        primeList = take 101 (drop x primes)
-        sumOfPrimes = sumList primeList
+    sumOfPrimes = sumList primeList
+    primeList = take 101 (drop index primes)
 
 main :: IO ()
 main = print consecutive101Prime
