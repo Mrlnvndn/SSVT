@@ -20,11 +20,32 @@ deran 0 = [[]]
 deran n = [perm | perm <- permutations [1 .. n], allDifferent [1 .. n] perm]
 
 prop_areSameLength :: Property
-prop_areSameLength = forAll randomSingleDigitNumber (\size -> forAll (elements (deran size)) (\perm -> length perm == size))
+prop_areSameLength =
+  forAll
+    randomSingleDigitNumber
+    ( \size ->
+        conjoin [length perm === size | perm <- deran size]
+    )
+
+prop_areAllDifferent :: Property
+prop_areAllDifferent =
+  forAll
+    randomSingleDigitNumber
+    ( \size ->
+        conjoin [allDifferent perm [1 .. size] === True | perm <- deran size]
+    )
+
+prop_haveSameElements :: Property
+prop_haveSameElements =
+  forAll
+    randomSingleDigitNumber
+    ( \size ->
+        conjoin [sameElements perm [1 .. size] === True | perm <- deran size]
+    )
 
 randomSingleDigitNumber :: Gen Int
 randomSingleDigitNumber =
-  choose (2, 9)
+  choose (0, 100)
 
 -- prop_isAllDifferent
 
@@ -32,3 +53,5 @@ randomSingleDigitNumber =
 main :: IO ()
 main = do
   quickCheck prop_areSameLength
+  quickCheck prop_areAllDifferent
+  quickCheck prop_haveSameElements
