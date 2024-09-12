@@ -12,15 +12,15 @@ factorial input
   | otherwise = factorial (input - 1) * input
 
 prop_outputAlwaysBiggerThanZero :: Property
-prop_outputAlwaysBiggerThanZero = forAll randomSingleOrDoubleDigitNumber ( \input -> factorial input > 0)
+prop_outputAlwaysBiggerThanZero = forAll randomSingleOrDoubleDigitNumber (\input -> factorial input > 0)
 
 prop_outputAlwaysBiggerOrEqualToInput :: Property
-prop_outputAlwaysBiggerOrEqualToInput = forAll randomSingleOrDoubleDigitNumber ( \input -> factorial input >= input )
+prop_outputAlwaysBiggerOrEqualToInput = forAll randomSingleOrDoubleDigitNumber (\input -> factorial input >= input)
 
 prop_factorialRecursiveDefinition :: Property
 prop_factorialRecursiveDefinition = forAll randomSingleOrDoubleDigitNumber (\input -> factorial input == input * factorial (input - 1))
 
---generating random single numbers
+-- generating random single numbers
 randomSingleOrDoubleDigitNumber :: Gen Integer
 randomSingleOrDoubleDigitNumber =
   choose (1, 99)
