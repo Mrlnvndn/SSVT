@@ -3,16 +3,26 @@ import Test.QuickCheck
 import Lecture2
 
 
-
--- stronger, weaker :: [a] -> (a -> Bool) -> (a -> Bool) -> Bool
--- stronger xs p q = forall xs (\ x -> p x --> q x)
--- weaker xs p q = stronger xs q p
-
 {-
 (\ x -> even x && x > 3) or even
 (\ x -> even x || x > 3) or even
 (\ x -> (even x && x > 3) || even x) or even
 even or (\ x -> (even x && x > 3) || even x)
+
+Prop1: (\ x -> even x && x > 3)
+Prop2: (\ x -> even x || x > 3) 
+Prop3: (\ x -> (even x && x > 3) || even x)
+Prop4: (\ x -> (even x && x > 3) || even x)
+PropEven: even
+
+Answer: 
+Prop1
+PropEven
+Prop4
+Prop3
+Prop2
+
+Time spent: 120 min
 -}
 
 prop_one :: Integer -> Bool
@@ -38,8 +48,6 @@ sortByStrength (x:xs) =
 
 main :: IO()
 main = do
-    -- let props = [("Property One", \ x -> even x && x > 3), ("Property Two", \ x -> even x || x > 3), ("Property Three", \ x -> (even x && x > 3) || even x), ("Property Four", \ x -> (even x && x > 3) || even x), ("Even Property", even)]
-    -- sortByStrength props\
     let props = [ ("Prop1", prop_one)
                 , ("Prop2", prop_two)
                 , ("Prop3", prop_three)
