@@ -16,7 +16,7 @@ main = do
 powerset :: [a] -> [[a]]
 powerset  = subsequences 
 
---Random Integer generator with non specific range (could use stdGen to not specify any range)
+--Random Integer generator with non specific range (could use stdGen to not specify any range, didn't work for me so stuck with this method)
 intGen ::  IO Int
 intGen = randomRIO (1, 10000)
 
