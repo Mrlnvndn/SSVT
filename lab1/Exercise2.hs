@@ -24,6 +24,11 @@ During the tests we are testing, we are testing that the property is true for th
 not that the property is true. I don't believe we are testing a mathematical fact since we are 
 not proving a generalizations with the tests.
 
+
+I am using a list size of 20 for computational reasons, the programs runs for a very long time 
+with a higher number.
+
+Time spent: 70 minutes
 -}
 
 prop_card :: [Integer] -> Bool 
