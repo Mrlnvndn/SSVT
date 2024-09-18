@@ -2,6 +2,7 @@ import Data.List
 import System.Random
 import Test.QuickCheck
 -- Time spent: 90 Minutes
+
 -- Function with edge conditions and a recursive structure
 factorial :: Integer -> Integer
 factorial n  
@@ -9,6 +10,12 @@ factorial n
     | n == 1 = 1
     | n > 0 = n * factorial (n - 1)
     | otherwise = error "Negative number"
+
+{-
+    Those Properties have been chosen because they are the essential properties for factorial numbers to get computed 
+    correctly. It would have been ideal to use a much broader range to test the properties but factorials are growing
+    very quickly. The best way to prove it for any given Integer input, would have been to use proof by induction.
+-}
 
 --Test Structure where Generator will input purely negative Numbers
 testNegatives :: Integer -> Bool
