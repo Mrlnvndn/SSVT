@@ -13,7 +13,7 @@ factorial n
 --Test Structure where Generator will input purely negative Numbers
 testNegatives :: Integer -> Bool
 testNegatives n = n < 0
--- Property assumes that the factorial of n is n* factorial (n+1)
+-- Property assumes that the factorial of n is n * factorial (n+1)
 propFactorialRecursive :: Integer -> Property
 propFactorialRecursive n = n >= 1 ==> factorial n == n * factorial (n - 1)
 -- Property states that the factorial of (n+1) will always be bigger than the factorial of n
