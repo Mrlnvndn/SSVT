@@ -1,11 +1,11 @@
 import Data.List
 import System.Random
 import Test.QuickCheck
+import Lecture3
 
-main :: IO ()
-main = do
-  let f = Impl (Prop 1) (Cnj [Prop 2, Prop 3])
-  print (cnf f)
+
+  
+
 
 {-
 Time spent: 120 Minutes
@@ -22,19 +22,11 @@ Time spent: 120 Minutes
     - Moving the negation inside the expressions
     - Distribute Disjunction on Conjonction
 
+    The printed results are correct, however multiple same expression can be printed. The program could be 
+    enhanced by recognizing which expressions are the same and just print 1 of them
+
 -}
 
-
-type Name = Int
-
-data Form
-  = Prop Name
-  | Neg Form
-  | Cnj [Form]
-  | Dsj [Form]
-  | Impl Form Form
-  | Equiv Form Form
-  deriving (Eq, Ord, Show)
 
 
 
