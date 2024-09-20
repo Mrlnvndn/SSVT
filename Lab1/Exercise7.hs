@@ -1,25 +1,8 @@
 import Data.List
 import qualified Data.Set as Set
 import Test.QuickCheck
+import Test.QuickCheck
 import Lecture3
-
-
--- type Name = Int
--- data Form = Prop Name
---     | Neg Form
---     | Cnj [Form]
---     | Dsj [Form]
---     | Impl Form Form
---     | Equiv Form Form
---     deriving (Eq,Ord)
-
--- sub :: Form -> Set Form
--- sub (Prop x) = Set [Prop x]
--- sub (Neg f) = unionSet (Set [Neg f]) (sub f)
--- sub f@(Cnj [f1,f2]) = unionSet ( unionSet (Set [f]) (sub f1)) (sub f2)
--- sub f@(Dsj [f1,f2]) = unionSet ( unionSet (Set [f]) (sub f1)) (sub f2)
--- sub f@(Impl f1 f2) = unionSet ( unionSet (Set [f]) (sub f1)) (sub f2)
--- f@(Equiv f1 f2) = unionSet ( unionSet (Set [f]) (sub f1)) (sub f2)
 
 -- Implementation is in book 7.7
 
@@ -50,7 +33,12 @@ Two properties to test:
     checked against the output of the sub function to ensure they are the same. 
 -}
 
--- Same function as sub but uses lists 
+{-
+- This is the same function as the given sub function, but it uses lists
+which allows for repeated items in the output
+
+- This function was created for testing purposes 
+-}
 subL :: Form -> [Form]
 subL (Prop x) = [Prop x]
 subL (Neg f) = [Neg f] ++ subL f
@@ -59,7 +47,7 @@ subL f@(Dsj [f1,f2]) = ([f] ++ subL f1) ++ subL f2
 subL f@(Impl f1 f2) = ([f] ++ subL f1) ++ subL f2
 
 -- Connective and atomic count functions from Road to Haskell 7.7
--- Edited for formatted and added Impl condition
+-- Edited for formatting and added Impl condition
 ccount :: Form -> Int
 ccount (Prop p) = 0
 ccount (Neg f) = 1 + (ccount f)
@@ -67,12 +55,6 @@ ccount f@(Cnj [f1,f2]) = 1 + (ccount f1) + (ccount f2)
 ccount f@(Dsj [f1,f2]) = 1 + (ccount f1) + (ccount f2)
 ccount f@(Impl f1 f2) = 1 + (ccount f1) + (ccount f2)
 
--- acountL :: Form -> [Int] -> [Int]
--- acountL (Prop p) aL = aL ++ [p]
--- acountL (Neg f) aL = acountL f aL
--- acountL f@(Cnj [f1,f2]) aL = (acountL f1 aL) ++ (acountL f2 aL)
--- acountL f@(Dsj [f1,f2]) aL = (acountL f1 aL) ++ (acountL f2 aL)
--- acountL f@(Impl f1 f2) aL = (acountL f1 aL) ++ (acountL f2 aL)
 acount :: Form -> Int
 acount (Prop p) = 1
 acount (Neg f) = acount f
@@ -80,8 +62,13 @@ acount f@(Cnj [f1,f2]) = (acount f1) + (acount f2)
 acount f@(Dsj [f1,f2]) = (acount f1) + (acount f2)
 acount f@(Impl f1 f2) = (acount f1) + (acount f2)
 
--- acount :: Form -> Int
--- acount f = maximum $ acountL f []
+-- Recursive nsub function
+nsub :: Form -> Set.Set Form -> Int 
+nsub (Prop x) = Set.fromList [Prop x]
+nsub (Neg f) = Set.union (Set.fromList [Neg f]) (sub f)
+nsub f@(Cnj [f1,f2]) = Set.union ( Set.union (Set.fromList [f]) (sub f1)) (sub f2)
+nsub f@(Dsj [f1,f2]) = Set.union ( Set.union (Set.fromList [f]) (sub f1)) (sub f2)
+nsub f@(Impl f1 f2) = Set.union ( Set.union (Set.fromList [f]) (sub f1)) (sub f2)
 
 prop_selfInclusion :: Form -> Bool
 prop_selfInclusion f =
@@ -90,6 +77,18 @@ prop_selfInclusion f =
 prop_atomicConnectCount :: Form -> Bool
 prop_atomicConnectCount f =
     length (subL f) == (ccount f + acount f) && Set.fromList (subL f) == sub f
+
+instance Arbitrary Form where
+    arbitrary = sized arbitraryForm
+
+arbitraryForm :: Int -> Gen Form
+arbitraryForm 0 = Prop <$> arbitrary  -- base case, just generate atomic propositions
+arbitraryForm n = oneof [ Prop <$> arbitrary
+                        , Neg <$> arbitraryForm (n-1)
+                        , Cnj <$> (sequence [arbitraryForm (n `div` 2), arbitraryForm (n `div` 2)])
+                        , Dsj <$> (sequence [arbitraryForm (n `div` 2), arbitraryForm (n `div` 2)])
+                        , Impl <$> arbitraryForm (n `div` 2) <*> arbitraryForm (n `div` 2)
+                        ]
 
 main :: IO()
 main = do
