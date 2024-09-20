@@ -6,6 +6,7 @@ import Lecture2
 import SetOrd
 
 {-
+Time Spent: 120 Minutes
     To refute the conjecture we have to come up with a list of tuples where the second element is not a prime number
     Finding ANY value in an infinite list of primes where their product+1 isn't prime will automatically refute the conjecture
 

@@ -31,8 +31,10 @@ propFactorialDivisibility :: Integer -> Property
 propFactorialDivisibility n = n >= 1 ==> all (\m -> factorial n `mod` m == 0) [1..n]
 
 -- Number generator for the negative property, range doesn't really matter as ALL negative numbers should not work anyways
+-- Tried to implement a random number generator without specifying a range but it kept on
 genNegativeInt :: Gen Integer
-genNegativeInt = choose(-10000, -1)
+genNegativeInt = choose (-1000, -1)
+
 
 -- This range seems to be a good range for the test of factorials to not load for too long on my laptop
 genInt :: Gen Integer

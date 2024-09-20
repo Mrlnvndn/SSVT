@@ -3,18 +3,8 @@ import System.Random
 import Test.QuickCheck
 import Test.QuickCheck.Function
 import Test.QuickCheck.Property
+import Lecture2
 
-infix 1 --> 
-
-(-->) :: Bool -> Bool -> Bool
-p --> q = (not p) || q
-
-forall :: [a] -> (a -> Bool) -> Bool
-forall = flip all
-
-stronger, weaker :: [a] -> (a -> Bool) -> (a -> Bool) -> Bool -- Basically looks if prop is stronger by checking is restricts more
-stronger xs p q = forall xs (\ x -> p x --> q x)
-weaker xs p q = stronger xs q p
 
     
     
