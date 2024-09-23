@@ -65,3 +65,11 @@ additiveSieve l lastPrime = do
 euler10 :: Integer
 euler10 = 2 + additiveSieve [3,5..2_000_000] 2
         
+
+
+main = do
+    putStrLn "Calculating solution to Euler problem 9..."
+    putStrLn $ "Solution: " ++ show euler9
+
+    putStrLn "Calculating solution to Euler problem 10..."
+    putStrLn $ "Solution: " ++ show euler10

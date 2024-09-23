@@ -46,6 +46,6 @@ main = do
     putStrLn $ "Testing base case: " ++ resBase
     putStrLn "Test against different (basic product) version of fact \ 
             \(for random numbers between 1 and 1000):"
-    quickCheck $ forAll genListOfPos propPositiveFactorial
+    quickCheck $ forAll (listOf genPos) propPositiveFactorial
     putStrLn "Test property: (n-1)! = n!/n"
     quickCheck $ forAll genPos prop1
