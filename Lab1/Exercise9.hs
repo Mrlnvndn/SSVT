@@ -6,7 +6,7 @@ import Lecture3
 
 
 
---Time Spent: 180 Minutes
+--Time Spent: 60 Minutes
 {-
     The main function that has to be created is IsPermutation which will check if two lists are permutations from each other
     A Permutation, unlike a derangement is a list based on an original one, which is going to have the exact same elements
@@ -96,6 +96,3 @@ main = do
 
  
    
-
-
-

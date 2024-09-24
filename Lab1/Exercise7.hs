@@ -192,7 +192,3 @@ main = do
     quickCheck prop_nsubNegInduction
     putStrLn "Testing induction step rest"
     quickCheck prop_nsubInduction
-
-
-
-
