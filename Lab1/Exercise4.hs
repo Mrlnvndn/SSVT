@@ -3,8 +3,10 @@ import Lecture2
 import System.Random
 import Test.QuickCheck
 
--- Implementation of isDerangement which checks if a list (xs) is a derangement of another list (ys)
--- by checking if the lists abide to three properties.
+{-
+1. Implementation of isDerangement which checks if a list (xs) is a derangement of another list (ys)
+by checking if the lists abide to three properties.
+-}
 isDerangement :: (Eq a) => [a] -> [a] -> Bool
 isDerangement xs ys = sameLength xs ys && allDifferent xs ys && sameElements xs ys
 
@@ -20,12 +22,18 @@ allDifferent xs ys = all (uncurry (/=)) (zip xs ys)
 sameElements :: (Eq a) => [a] -> [a] -> Bool
 sameElements xs ys = null (xs \\ ys) && null (ys \\ xs)
 
--- Implementation of deran which generates all derangements using the permutations function and 2 properties defined above
--- to make sure ony permutations which are also derangements are returend
+{-
+2. Implementation of deran which generates all derangements using the permutations function and the allDifferent function defined above
+to make sure ony permutations which are also derangements are returend. Because of the use of perumtations, sameElements and sameLength are true by default
+so they do not need to be checked
+-}
 deran :: Int -> [[Int]]
 deran 0 = [[]]
 deran n = [perm | perm <- permutations [1 .. n], allDifferent [1 .. n] perm]
 
+{-
+3. Testable properties based on functions above used to check if one set is a derangement of another one
+-}
 prop_areSameLength :: Int -> Bool
 prop_areSameLength size = all (\perm -> length perm == size) (deran size)
 
@@ -46,6 +54,12 @@ p2 n = even n || n > 3 -- From second equation: (\ x -> even x || x > 3)
 p3 n = (even n && n > 3) || even n -- From third equation: (\ x -> (even x && x > 3) || even x)
 p4 = p3 -- Right side of fourth equation is the same as p3
 
+{-
+4. & 5. Similar code to Exercise3.hs to automatically determine the relative weakness of the properties
+
+The answer our implementation spits out is (order from strongest to weakest):
+["prop_haveSameElements","prop_areSameLength","prop_areAllDifferent"]
+-}
 propList :: [Prop]
 propList =
   [ ("prop_areAllDifferent", prop_areAllDifferent),
@@ -68,9 +82,11 @@ testDescending (x : y : rest) =
   stronger [1 .. 10] (snd x) (snd y)
     && testDescending rest
 
--- Range between 0 and 9 is chosen for each property to make the compute time reasonable,
--- because increasing the length by one increases the number of derangements by roughly tenfold.
--- So this way we keep the time and space complexity low, while also showing it works for lists upto length 10
+{-
+Range between 0 and 9 is chosen for each property to make the compute time reasonable,
+because increasing the length by one increases the number of derangements by roughly tenfold.
+So this way we keep the time and space complexity low, while also showing it works for lists upto length 10
+-}
 main = do
   let domain = [0 .. 9] -- Small range of integers as suggested in ex.
   let sortedProps = quicksort' domain propList

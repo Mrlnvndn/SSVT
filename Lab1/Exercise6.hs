@@ -3,12 +3,15 @@ import Lecture3
 
 -- Time Spent: 360 min
 
--- For this exercise, we had to write a function which takes any Form and turns it into its conjunction normal form.
--- To do this, first we have to remove the arrows for which a function already exists in Lecture3.hs called 'arrowfree'.
--- Then convert to negation normal form, we can use the function 'nnf' from Lecture3.hs, which among others uses De Morgan laws
--- Then we distribute disjunctions over conjunctions using the distribution laws recursively on the form
--- Finally we flatten and simplify the From to get to a readable form which is easily definable as a form in CNF
--- NOTE: not all functions handle all possible Form states, as some have already been rewritten at the time of calling that function
+{-
+For this exercise, we had to write a function which takes any Form and turns it into its conjunction normal form.
+To do this, first we have to remove the arrows for which a function already exists in Lecture3.hs called 'arrowfree'.
+Then convert to negation normal form, we can use the function 'nnf' from Lecture3.hs, which among others uses De Morgan laws
+Then we distribute disjunctions over conjunctions using the distribution laws recursively on the form
+Finally we flatten and simplify the From to get to a readable form which is easily definable as a form in CNF
+NOTE: not all functions handle all possible Form states, as some states have already been rewritten to others at the time of calling that function
+
+-}
 
 cnf :: Form -> Form
 cnf fs = simplify $ flatten $ distlaw $ nnf $ arrowfree fs
