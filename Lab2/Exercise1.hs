@@ -1,12 +1,12 @@
 module Exercise1 where
 
 import Data.List
--- import Test.QuickCheck
+import Test.QuickCheck
 import Mutation
-import System.Random
 import MultiplicationTable (multiplicationTable)
 import System.Random
-import Data.Map
+import Utils ( fisherYates )
+
 
 -- Time Spent: -- min
 
@@ -55,20 +55,7 @@ or both.
 
 -- Helper functions:
 
--- Purely functional algorithm to randomly shuffle: https://wiki.haskell.org/Random_shuffle
-fisherYatesStep :: RandomGen g => (Map Int a, g) -> (Int, a) -> (Map Int a, g)
-fisherYatesStep (m, gen) (i, x) = ((insert j x . insert i (m ! j)) m, gen')
-  where
-    (j, gen') = randomR (0, i) gen
 
-fisherYates :: RandomGen g => g -> [a] -> ([a], g)
-fisherYates gen [] = ([], gen)
-fisherYates gen l = 
-  toElems $ foldl fisherYatesStep (initial (head l) gen) (numerate (tail l))
-  where
-    toElems (x, y) = (elems x, y)
-    numerate = zip [1..]
-    initial x gen = (singleton 0 x, gen)
 
 
 -- Mutators:
@@ -76,16 +63,19 @@ fisherYates gen l =
 reorderSort :: [Integer] -> [Integer]
 reorderSort = sort
 
-reorderShuffle :: [Integer] -> [Integer]
-reorderShuffle xs = fisherYates arbitrary xs
+reorderShuffle :: [Integer] -> IO [Integer]
+reorderShuffle xs = do
+  randomGen <- newStdGen
+  return $ fst $ fisherYates randomGen xs
 
 addMiddleElement :: [Integer] -> Gen [Integer]
 addMiddleElement xs = do
   let (ys, zs) = splitHalf xs
-  let newValue <- generate arbitrary
-  return ys ++ [newValue] ++ zs
+  newValue <- arbitrary
+  return $ ys ++ [newValue] ++ zs
 
-splitHalf l = splitAt ((length l + 1) `div` 2) l
+splitHalf :: [a] -> ([a], [a])
+splitHalf l = Data.List.splitAt ((length l + 1) `div` 2) l
 
 
 emptyList :: [Integer] -> [Integer]
@@ -93,8 +83,20 @@ emptyList _ = []
 
 
 main = do
-    let testList <- listOf arbitrary
+    testList <- generate $ listOf arbitrary
+    putStrLn $ "Randomly generated arbitrary list: " ++ show testList
 
-    putStrLn $ "Sorted: " show (reorderSort testList)
+    putStrLn $ "Sorted: " ++ show (reorderSort testList)
+
+    shuffleRes <- reorderShuffle testList
+    putStrLn $ "Random shuffle: " ++ show (shuffleRes)
+
+    addedMiddle <- generate $ addMiddleElement testList
+    putStrLn $ "Added middle element: " ++ show addedMiddle
+
+    putStrLn $ "Empty list mutation: " ++ show (emptyList testList)
+
+
+
 
 
