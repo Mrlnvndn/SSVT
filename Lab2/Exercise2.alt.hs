@@ -4,10 +4,7 @@ import FitSpec
 import Exercise1
 import Mutation
 import Test.QuickCheck
-
-type TypeFut = Integer -> [Integer]
-type Prop = TypeFut -> Integer -> Bool
-type Mutator = ([Integer] -> Gen [Integer])
+import Utils
 
 countSurvivors :: Integer -> [Prop] -> TypeFut -> Integer
 countSurvivors nMutants props f = 1 --implement...
