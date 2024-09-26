@@ -45,9 +45,10 @@ countSurvivors nMutants listProp f mutators = do
     -- return $ length $ filter id results
     -- filterM (mutate' (mutators !! 0) listProp f 10) [0..nMutants]
     -- let survivors = mapM checkMutant [0..nMutants-1]
-    results <- mapM checkMutant [0..nMutants-1] 
-    let survivors = filter (all id) results
-    -- (length (concat survivors))
+    -- Apply checkMutant over the list 
+    checkMutantResult <- mapM checkMutant [0..nMutants-1] 
+    -- If mutant passes through all the properties (the list is all true) then it is added to survivors
+    let survivors = filter (\result -> all (== True) result) checkMutantResult
     return $ length survivors
     where
         checkMutant :: Integer -> IO [Bool]
@@ -56,9 +57,11 @@ countSurvivors nMutants listProp f mutators = do
                 let mutator = genMutators !! fromIntegral (input `mod` fromIntegral (length genMutators))
                 -- Apply mutator to properties
                 -- let propertiesResult = mutate' mutator listProp f input
+                -- use generate to convert Gen [Bool] to IO [Bool]
                 propertiesResult <- generate $ mutate' mutator listProp f input
                 -- Check all properties; if any property fails, the mutant is killed
-                return propertiesResult -- this will return a bunch of subsets 2
+                -- returns a list of IO [Bools] 
+                return propertiesResult 
                 -- where
                 --     checkProperty :: ([Integer] -> Gen [Integer]) -> Gen [Bool]
                 --     checkProperty mutator = do
