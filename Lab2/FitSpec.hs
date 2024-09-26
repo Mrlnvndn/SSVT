@@ -26,6 +26,7 @@ prop_moduloIsZero :: (Integer -> [Integer]) -> Integer -> Bool
 prop_moduloIsZero f x = x /= 0 --> all (\v -> v `mod` x == 0) (f x)
 
 linear :: [Integer] -> Integer -> Bool
+linear [] _ = False
 linear [x] _ = True
 linear (x : xs) y = head xs - x == y && linear xs y
 

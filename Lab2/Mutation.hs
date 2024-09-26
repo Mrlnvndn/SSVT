@@ -48,7 +48,7 @@ addElements xs = do
 
 -- Removes 1 to (length - 1) elements from an output list
 removeElements :: [Integer] -> Gen [Integer]
-removeElements xs = choose (1, length xs) >>= \x -> return $ take x xs
+removeElements xs = choose (1, (length xs) - 1) >>= \x -> return $ take x xs
 
 -- Any list
 anyList :: [Integer] -> Gen [Integer]
