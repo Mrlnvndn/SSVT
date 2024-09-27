@@ -91,56 +91,44 @@ createPropMutantMatrix propMap nMutants fut = do
     propResults <- mapM (\p -> runProp p mutations fut) (Map.elems propMap)
     return $ Map.fromList (zip (Map.keys propMap) propResults)
 
-
-
-
--- Calculates Minimal Subset of Properties of a combination of a Function Under Test
--- and a set of properties
-minPropSubset :: TypeFut -> [Prop] -> [Prop]
-minPropSubset fut props = props
-
-
+-- First used this simple function to test equivalence
 isEquiv :: [Bool] -> [Bool] -> Bool
 isEquiv xs ys = xs == ys
 
-mapValues :: Map k v -> [v]
-mapValues m = map (\x -> snd x) (Map.toList m)
+-- Then moved to this function to compare props
+isWeakerVersionOf :: [Bool] -> [Bool] -> Bool
+p `isWeakerVersionOf` q = and $ map (uncurry (Props.-->)) (zip p q)
 
 
--- filterEquiv :: Map String [Bool] -> (Map String [Bool], Map String [Bool])
--- filterEquiv mutationMap = Map.partitionWithKey (\k v -> hasEquiv k v mutationMap) mutationMap where
---     hasEquiv key val mutationMap = do -- Checks if this mutation result has an equivalent result in the map
---         let restMap = Map.delete key mutationMap
---         Map.null $ Map.filter (\x -> isEquiv x val) restMap
+testWeaker = do
+    let a = [False, True, False, True ]
+    let b = [False, False, False, False ]
+    putStrLn $ "Comparing a with b: " ++ show (b `isWeakerVersionOf` a)
 
-filterEquiv :: Map String [Bool] -> (Map String [Bool], Map String (Maybe String))
+
+filterEquiv :: MutationMap -> (MutationMap, Map String (Maybe String))
 filterEquiv mutationMap = foldr partitionEquiv (mutationMap, Map.empty) (Map.keys mutationMap)
   where
     partitionEquiv key (uniqueMap, equivMap) =
       let val = uniqueMap Map.! key
           restMap = Map.delete key uniqueMap
-          equiv = find (\k -> isEquiv (restMap Map.! k) val) (Map.keys restMap)
+          equiv = find (\k -> val `isWeakerVersionOf` (restMap Map.! k)) (Map.keys restMap)
       in case equiv of -- Handle case if equivalence is found or not
            Just e  -> (restMap, Map.insert key (Just e) equivMap)
            Nothing -> (uniqueMap, equivMap)
 
 
-printResMap :: Map String [Bool] -> String -> IO()
-printResMap resMap name = do
-    putStrLn $ (show name) ++ ":"
-    putStrLn . (intercalate "\n") $ mapValues $ Map.mapWithKey showEntry resMap
-    putStrLn "\n"
-    where
-    showEntry key x = (show key) ++ ":" ++ show x
 
-printEquivMap :: Map String (Maybe String) -> String -> IO ()
-printEquivMap equivMap name = do
-    putStrLn $ name ++ ":"
-    putStrLn . intercalate "\n" $ map showEntry (Map.toList equivMap)
-    putStrLn "\n"
-  where
-    showEntry (key, Just val) = key ++ " is equivalent to " ++ val
-    showEntry (key, Nothing)  = key ++ " has no equivalent"
+
+
+-- Calculates Minimal Subset of Properties of a combination of a Function Under Test
+-- and a set of properties
+minPropSubset :: TypeFut -> PropMap -> Integer -> IO MutationMap
+minPropSubset fut props nMutants = do
+    matrix <- createPropMutantMatrix propMap nMutants multiplicationTable
+    let (minimal, equiv) = filterEquiv matrix
+    return minimal
+
 
 main :: IO ()
 main = do
