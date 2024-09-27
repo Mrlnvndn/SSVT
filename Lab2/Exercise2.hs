@@ -5,6 +5,7 @@ import Test.QuickCheck
 import Mutation (mutators, mutate')
 import FitSpec
 import Control.Monad (filterM)
+import Test.QuickCheck.Gen (Gen, vectorOf, choose)
 
 -- properties 
 -- properties = [prop_tenElements, prop_firstElementIsInput, prop_sumIsTriangleNumberTimesInput, prop_linear, prop_moduloIsZero]
@@ -36,39 +37,32 @@ prop_linear' l x = linear l x
 prop_moduloIsZero' :: [Integer] -> Integer -> Bool
 prop_moduloIsZero' l x = x /= 0 --> all (\v -> v `mod` x == 0) l
 
+-- Generate list of random numbers
+randomIntList :: Int -> Gen [Integer]
+randomIntList n = vectorOf n (choose (1, 100))
+
 -- Add argument to add genMutants 
 countSurvivors :: Integer -> [[Integer] -> Integer -> Bool] -> (Integer -> [Integer]) -> [[Integer] -> Gen [Integer]] -> IO Int
 countSurvivors nMutants listProp f mutators = do
     -- Generate mutations
-    -- len6gth [k | k <- [0..nMutants], not (mutate' (mutators !! 0) listProp f 10)]
-    -- results <- mapM (mutateAndCheck listProp f) [0..nMutants-1]
-    -- return $ length $ filter id results
-    -- filterM (mutate' (mutators !! 0) listProp f 10) [0..nMutants]
-    -- let survivors = mapM checkMutant [0..nMutants-1]
     -- Apply checkMutant over the list 
-    checkMutantResult <- mapM checkMutant [0..nMutants-1] 
+    -- let randList = randomIntList nMutants
+    checkMutantResult <- mapM checkMutant [0..nMutants-1]--randList
     -- If mutant passes through all the properties (the list is all true) then it is added to survivors
     let survivors = filter (\result -> all (== True) result) checkMutantResult
     return $ length survivors
+
     where
         checkMutant :: Integer -> IO [Bool]
         checkMutant input = do
                 -- Rolls through the mutators
                 let mutator = genMutators !! fromIntegral (input `mod` fromIntegral (length genMutators))
                 -- Apply mutator to properties
-                -- let propertiesResult = mutate' mutator listProp f input
                 -- use generate to convert Gen [Bool] to IO [Bool]
                 propertiesResult <- generate $ mutate' mutator listProp f input
                 -- Check all properties; if any property fails, the mutant is killed
                 -- returns a list of IO [Bools] 
                 return propertiesResult 
-                -- where
-                --     checkProperty :: ([Integer] -> Gen [Integer]) -> Gen [Bool]
-                --     checkProperty mutator = do
-                --         -- apply mutate function to each property
-                --         -- mapM (\props -> mutate' mutator props f input) listProp 
-                --         mutate' mutator listProp f input
-
 
 
 -- Generate mutations
