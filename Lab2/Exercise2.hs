@@ -62,7 +62,9 @@ countSurvivors nMutants listProp f mutators = do
                 propertiesResult <- generate $ mutate' mutator listProp f input
                 -- Check all properties; if any property fails, the mutant is killed
                 -- returns a list of IO [Bools] 
-                return propertiesResult 
+                if null propertiesResult
+                    then return [False]
+                else return propertiesResult
 
 
 -- Generate mutations
