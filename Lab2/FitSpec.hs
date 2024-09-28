@@ -32,6 +32,7 @@ infix 1 -->
 (-->) :: Bool -> Bool -> Bool
 p --> q = not p || q
 
+properties :: (Integer -> [Integer]) -> [Property]
 properties multiplicationTable =
   [ property $ prop_tenElements multiplicationTable
   , property $ prop_firstElementIsInput multiplicationTable
