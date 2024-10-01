@@ -41,6 +41,8 @@ Some side notes on the graph above:
     are posible mutations imaginable which would satisfy it, but never all at the same time.
 
   - Give the above, with the current combination of properties and generators all mutations will be caught and 0 will be returned every time.
+
+Time spent: 240 minutes
 -}
 
 -- countSurvivors does mainly 3 things:
