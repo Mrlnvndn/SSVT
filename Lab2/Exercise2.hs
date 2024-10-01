@@ -9,7 +9,7 @@ import Test.FitSpec (results)
 import Test.QuickCheck
 
 {-
-For exercise 2, we opted to use the mutation functions form Mutation.hs, and the props and fut from FitSpec.hs\
+For exercise 2, we opted to use the mutation functions form Mutation.hs, and the props and fut from FitSpec.hs.
 To get this to work, the signature needed to be altered slightly to fit into the mutate function: it now takes
 the mutated input as a parameter instead of the fut, so it can check if the property holds on the input and mutated output,
 just like the mutate function wants. Furthermore we wrote a function which generates the requested amount of mutants,
@@ -79,22 +79,6 @@ determineSurvivingMutant fs = and fs
 
 -- The slightly altered properties, with the mutated output and original input as parameters
 properties' = [prop_moduloIsZero', prop_linear', prop_sumIsTriangleNumberTimesInput', prop_firstElementIsInput', prop_tenElements']
-
-prop_moduloIsZero' :: [Integer] -> Integer -> Bool
-prop_moduloIsZero' mutation input = input /= 0 --> all (\v -> v `mod` input == 0) mutation
-
-prop_linear' :: [Integer] -> Integer -> Bool
-prop_linear' = linear
-
-prop_sumIsTriangleNumberTimesInput' :: [Integer] -> Integer -> Bool
-prop_sumIsTriangleNumberTimesInput' mutation input = sum mutation == sum [1 .. 10] * input
-
-prop_firstElementIsInput' :: [Integer] -> Integer -> Bool
-prop_firstElementIsInput' [] _ = False
-prop_firstElementIsInput' mutation input = head mutation == input
-
-prop_tenElements' :: [Integer] -> Integer -> Bool
-prop_tenElements' mutation input = length mutation == 10
 
 main :: IO ()
 main = do
