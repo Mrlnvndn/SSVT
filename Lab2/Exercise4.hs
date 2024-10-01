@@ -74,9 +74,20 @@ propsWithNames =
     (prop_moduloIsZero', "prop_moduloIsZero'")
   ]
 
+showStrengths :: [[Integer] -> Integer -> Bool] -> [[([Integer] -> Integer -> Bool, String)]] -> Integer -> IO ()
+showStrengths props subsets nMutants = do
+  strengths <- mapM (propStrength nMutants . map fst) subsets
+  mapM_ (\(subset, strength) -> putStrLn $
+    "Subset: " ++ show (map snd subset) ++
+    " -> Percentage of mutants killed: " ++ show strength ++ "%") (zip subsets strengths)
+
+getSubSets :: [([Integer] -> Integer -> Bool, String)] -> [[([Integer] -> Integer -> Bool, String)]]
+getSubSets propsWithNames = filter (not . null) (subsequences propsWithNames)
+
 main :: IO ()
 main = do
+  let nMutants = 100000
   let props = map fst propsWithNames
-  let propSubsets = filter (not . null) (subsequences propsWithNames) -- Generate all non-empty subsets
-  strengths <- mapM (propStrength 100000 . map fst) propSubsets
-  mapM_ (\(subset, strength) -> putStrLn $ "Subset: " ++ show (map snd subset) ++ " -> Percentage of mutants killed: " ++ show strength ++ "%") (zip propSubsets strengths)
+  let propSubsets = getSubSets propsWithNames -- Generate all non-empty subsets
+  showStrengths props propSubsets nMutants
+  

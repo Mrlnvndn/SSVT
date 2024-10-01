@@ -77,8 +77,8 @@ determineSurvivingMutant :: [Bool] -> Bool
 determineSurvivingMutant [] = False
 determineSurvivingMutant fs = and fs
 
--- The slightly altered properties, with the mutated output and original input as parameters
-properties' = [prop_moduloIsZero', prop_linear', prop_sumIsTriangleNumberTimesInput', prop_firstElementIsInput', prop_tenElements']
+-- Using the slightly altered properties,
+-- with the mutated output and original input as parameters
 
 main :: IO ()
 main = do

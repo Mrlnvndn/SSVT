@@ -83,4 +83,4 @@ checkForSubs :: [(Bool, Bool)] -> Bool
 checkForSubs = all (\(a, b) -> not (a && not b))
 
 -- Choose 2 properties that are going to get tested for equivalence
-properties' = [prop_moduloIsZero', prop_moduloIsZero', prop_firstElementIsInput', prop_sumIsTriangleNumberTimesInput', prop_tenElements']
+-- properties' = [prop_moduloIsZero', prop_moduloIsZero', prop_firstElementIsInput', prop_sumIsTriangleNumberTimesInput', prop_tenElements']

@@ -4,16 +4,14 @@ import Data.Map (Map)
 import qualified Data.Map as Map
 import Mutation(mutators,mutate')
 import Utils
-import Props
 import Test.QuickCheck
 import FitSpec
 import Control.Monad
 import System.Random
 import Data.List (intercalate)
 import Data.Foldable (find)
-import Props
 
--- Time Spent: 240 min
+-- Time Spent: 400 min
 {--
 Exercise 3: 
 Find the definition of the minimal property subset (MPS) in the lecture.
@@ -68,12 +66,21 @@ Just for the sake of thinking about it more deeply, some other methods we though
     (or have the same result as the entire propertyset)
     [This would have been a good approach, but we only came up with this idea while writing the final code.] ->
         Still results in problems when a lot of properties are equally strong (which will happen a lot for low amount of mutations)
+
+Some final remarks:
+- Debugging this took a while before I read the output of mutate' was that False meant killed, which completely explained
+    why so many mutations were 'surviving'. -_-
+- We picked a small number of mutations to visualize each step in getting to a MPS. Of course results
+    will differ a lot when you look at a realistic number of mutations. (No equivalencies are proven)
+- In main all steps are done individually. They are grouped in minPropSubset function
+
 --}
 
 -- ## Generating mutations based on the 'mutators' list defined in Mutation.hs
 generateRandomInteger :: IO Integer
 generateRandomInteger = randomRIO (1, 100)
 
+-- Same function as ex2
 getMutations :: Integer -> IO [[Integer] -> Gen [Integer]]
 getMutations numberOfMutants = do
   indices <- replicateM (fromIntegral numberOfMutants) (randomRIO (0, length mutators - 1))
@@ -87,7 +94,7 @@ runProp :: Prop -> [Mutator] -> TypeFut -> IO [Bool]
 runProp prop mutations fut = forM mutations $ \mutation -> do 
     randInput <- generateRandomInteger
     resForMutator <- generate (mutate' mutation [prop] fut randInput)
-    return (all (== True) resForMutator)
+    return (all (== False) resForMutator)
 
 -- Run list of properties against n mutants and create a map with property names
 -- Takes the Map of Properties (like defined in Props.hs), number of Mutants to get and function under test
@@ -111,7 +118,7 @@ isEquiv xs ys = xs == ys
 --     let b = [False, False, False, False ]
 --     putStrLn $ "Comparing a with b: " ++ show (b `isWeakerVersionOf` a)
 isWeakerVersionOf :: [Bool] -> [Bool] -> Bool
-p `isWeakerVersionOf` q = and $ map (uncurry (Props.-->)) (zip p q)
+p `isWeakerVersionOf` q = and $ map (uncurry (-->)) (zip p q)
 
 
 
@@ -150,7 +157,8 @@ minPropSubset fut props nMutants = do
 -- Main function which does the same as minPropSubset, but with some more printing for clarity
 main :: IO ()
 main = do
-    matrix <- createPropMutantMatrix propMap 5 multiplicationTable
+    let nMutants = 10 -- We pick quite a small amount so we can clearly see all steps
+    matrix <- createPropMutantMatrix propMap nMutants multiplicationTable
     printResMap matrix "propMutantMatrix"
 
     let withoutUseless = filterUseless matrix
@@ -158,7 +166,6 @@ main = do
 
 
     let (filtered, equiv) = filterEquiv withoutUseless
-    printResMap filtered "After Equiv/Subset filter:"
+    printResMap filtered "Final MPS after Equiv/Subset filter:"
 
-    putStrLn $ "Equivalencies found:"
     printEquivMap equiv "Equivalencies that were found:"
