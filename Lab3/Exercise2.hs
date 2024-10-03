@@ -47,23 +47,23 @@ prop_elementsNotInSecondSet (Set xs) (Set ys) (Set output) = all (`notElem` ys) 
 -- List of properties
 intersectProperties :: [(String, Set Int -> Set Int -> Set Int -> Bool)]
 intersectProperties =
-  [ ("Intersection: No duplicates", \s1 s2 s3 -> prop_noDuplicates s3),
-    ("Intersection: Equal or smaller", prop_equalOrSmaller),
-    ("Intersection: Elements in both sets", prop_elementsInBothSets)
+  [ ("Intersection: No duplicates: ", \s1 s2 s3 -> prop_noDuplicates s3),
+    ("Intersection: Equal or smaller: ", prop_equalOrSmaller),
+    ("Intersection: Elements in both sets: ", prop_elementsInBothSets)
   ]
 
 unionProperties :: [(String, Set Int -> Set Int -> Set Int -> Bool)]
 unionProperties =
-  [ ("Union: No duplicates", \s1 s2 s3 -> prop_noDuplicates s3),
-    ("Union: Equal or larger", prop_equalOrLarger),
-    ("Union: Contain all elements", prop_containAllElements)
+  [ ("Union: No duplicates: ", \s1 s2 s3 -> prop_noDuplicates s3),
+    ("Union: Equal or larger: ", prop_equalOrLarger),
+    ("Union: Contain all elements: ", prop_containAllElements)
   ]
 
 differenceProperties :: [(String, Set Int -> Set Int -> Set Int -> Bool)]
 differenceProperties =
-  [ ("Difference: No duplicates", \s1 s2 s3 -> prop_noDuplicates s3),
-    ("Difference: Equal or smaller", prop_equalOrSmaller2),
-    ("Difference: Elements not in second set", prop_elementsNotInSecondSet)
+  [ ("Difference: No duplicates: ", \s1 s2 s3 -> prop_noDuplicates s3),
+    ("Difference: Equal or smaller: ", prop_equalOrSmaller2),
+    ("Difference: Elements not in second set: ", prop_elementsNotInSecondSet)
   ]
 
 -- Function to print properties
@@ -74,24 +74,36 @@ testUsingCustomGenerator = do
   let difference = setDifference set1 set2
   let union = setUnion set1 set2
   let intersect = setIntersection set1 set2
-  mapM_ (\(desc, prop) -> putStrLn (desc ++ ": " ++ show (prop set1 set2 intersect))) intersectProperties
-  mapM_ (\(desc, prop) -> putStrLn (desc ++ ": " ++ show (prop set1 set2 difference))) differenceProperties
-  mapM_ (\(desc, prop) -> putStrLn (desc ++ ": " ++ show (prop set1 set2 union))) unionProperties
+  mapM_ (\(desc, prop) -> putStrLn (desc ++ show (prop set1 set2 intersect))) intersectProperties
+  mapM_ (\(desc, prop) -> putStrLn (desc ++ show (prop set1 set2 difference))) differenceProperties
+  mapM_ (\(desc, prop) -> putStrLn (desc ++ show (prop set1 set2 union))) unionProperties
 
 -- Function to run QuickCheck tests
 testUsingQuickCheckGenerator :: IO ()
 testUsingQuickCheckGenerator = do
   set1 <- generate generator'
   set2 <- generate generator'
-  putStr "Intersection: All properties: "
-  quickCheck (all (\(_, prop) -> prop set1 set2 (setIntersection set1 set2)) intersectProperties)
-  putStr "Union: All properties: "
-  quickCheck (all (\(_, prop) -> prop set1 set2 (setUnion set1 set2)) unionProperties)
-  putStr "Difference: All properties: "
-  quickCheck (all (\(_, prop) -> prop set1 set2 (setDifference set1 set2)) differenceProperties)
+  mapM_
+    ( \(desc, prop) -> do
+        putStr desc
+        quickCheck (prop set1 set2 (setIntersection set1 set2))
+    )
+    intersectProperties
+  mapM_
+    ( \(desc, prop) -> do
+        putStr desc
+        quickCheck (prop set1 set2 (setDifference set1 set2))
+    )
+    differenceProperties
+  mapM_
+    ( \(desc, prop) -> do
+        putStr desc
+        quickCheck (prop set1 set2 (setUnion set1 set2))
+    )
+    unionProperties
 
 main :: IO ()
 main = do
   testUsingCustomGenerator
-  putStrLn "***********************************************"
+  putStrLn "*****************************************************"
   testUsingQuickCheckGenerator
