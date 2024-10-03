@@ -5,6 +5,8 @@ import SetOrd
 import System.Random
 import Test.QuickCheck
 
+-- Time spent: 120 min
+
 -- A ∩ B
 setIntersection :: (Ord a) => Set a -> Set a -> Set a
 setIntersection (Set xs) (Set ys) = list2set (xs `intersect` ys)
@@ -64,8 +66,9 @@ differenceProperties =
     ("Difference: Elements not in second set", prop_elementsNotInSecondSet)
   ]
 
-main :: IO ()
-main = do
+-- Function to print properties
+testUsingCustomGenerator :: IO ()
+testUsingCustomGenerator = do
   set1 <- generator
   set2 <- generator
   let difference = setDifference set1 set2
@@ -74,3 +77,21 @@ main = do
   mapM_ (\(desc, prop) -> putStrLn (desc ++ ": " ++ show (prop set1 set2 intersect))) intersectProperties
   mapM_ (\(desc, prop) -> putStrLn (desc ++ ": " ++ show (prop set1 set2 difference))) differenceProperties
   mapM_ (\(desc, prop) -> putStrLn (desc ++ ": " ++ show (prop set1 set2 union))) unionProperties
+
+-- Function to run QuickCheck tests
+testUsingQuickCheckGenerator :: IO ()
+testUsingQuickCheckGenerator = do
+  set1 <- generate generator'
+  set2 <- generate generator'
+  putStr "Intersection: All properties: "
+  quickCheck (all (\(_, prop) -> prop set1 set2 (setIntersection set1 set2)) intersectProperties)
+  putStr "Union: All properties: "
+  quickCheck (all (\(_, prop) -> prop set1 set2 (setUnion set1 set2)) unionProperties)
+  putStr "Difference: All properties: "
+  quickCheck (all (\(_, prop) -> prop set1 set2 (setDifference set1 set2)) differenceProperties)
+
+main :: IO ()
+main = do
+  testUsingCustomGenerator
+  putStrLn "***********************************************"
+  testUsingQuickCheckGenerator
