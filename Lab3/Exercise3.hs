@@ -3,7 +3,6 @@ import Data.List
 import System.Random
 import Test.QuickCheck
 import SetOrd ( Set(..), unionSet )
-import Exercise1 (manualMethod, quickMethod, generateRandomValue)
 
 type Rel a = [(a,a)]
 
