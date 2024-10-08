@@ -29,9 +29,9 @@ prop_symClosSuperset :: Ord a => Rel a -> Bool
 prop_symClosSuperset r = all (`elem` symR) r
   where symR = symClos r
 
--- Property: Transitivity. Checks for transitivity, if ther is (a,b) and (b,c) then there has to be a (a,c)
+-- Property: Transitivity. Checks for transitivity, if there is (a,b) and (b,c) then there has to be a (a,c)
 prop_trClosTransitive :: Ord a => Rel a -> Bool
-prop_trClosTransitive r = all (\(a, c) -> any (\b -> (a, b) `elem` trR && (b, c) `elem` trR) [y | (x, y) <- trR, x == a]) trR
+prop_trClosTransitive r = all (\(a, b, c) -> (a, c) `elem` trR) [(a, b, c) | (a, b) <- trR, (b', c) <- trR, b == b']
   where trR = trClos r
 
 -- Property: Superset for trClos. Every element contained in the Set has to be contained in the transitive closure of that Set
