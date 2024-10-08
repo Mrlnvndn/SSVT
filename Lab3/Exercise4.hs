@@ -1,17 +1,18 @@
 module Exercise4 where
 
 -- import Data.Set
+
+import Control.Applicative
 import Data.List
 import Test.QuickCheck
 import Test.QuickCheck.Property (Prop)
-import Control.Applicative
 
-type Rel a = [(a,a)]
+type Rel a = [(a, a)]
 
 -- Time Spent 340 min
 
 {--
-Exercise 4: 
+Exercise 4:
     1. Write a function for checking whether a relation is serial.
     2. Create two props to test 'isSerial' and test it using quickCheck
     3. Look at the modulo relation: How to test?
@@ -39,7 +40,6 @@ And we check basic properties of domains and relations:
 - If relations are serial we know len(relation) is at least len(domain)
 - empty domain is always serial
 --}
-
 
 isSerial :: (Eq a) => [a] -> Rel a -> Bool
 isSerial domain relation = all (\e -> any (\(x, _) -> x == e) relation) domain
@@ -69,9 +69,9 @@ genDomainRelation = do
 
 genDomainAndModulo :: Gen ([Integer], Integer)
 genDomainAndModulo = do
-    domain <- genDomain
-    modulo <- arbitrary `suchThat` (\x -> x /= 0)
-    return (domain, modulo)
+  domain <- genDomain
+  modulo <- arbitrary `suchThat` (\x -> x /= 0)
+  return (domain, modulo)
 
 -- ### Helper functions for props ###
 
@@ -80,36 +80,37 @@ genDomainAndModulo = do
 cartesianProduct :: (Eq a, Ord a) => [a] -> [a] -> Rel a
 cartesianProduct xs ys = (,) <$> xs <*> ys
 
-getReflexive :: Ord a => [a] -> Rel a
+getReflexive :: (Ord a) => [a] -> Rel a
 getReflexive domain = map (\x -> (x, x)) domain
 
-getMappedRel :: Eq a => a -> Rel a -> [a]
+getMappedRel :: (Eq a) => a -> Rel a -> [a]
 getMappedRel x rel = map snd $ filter (\(a, _) -> x == a) rel
 
 -- This function accepts the domain as the first parameter and the `Rel` as the second parameter.
 -- Returns true if, for every number/char in domain we have some part of relation mapping it to another
 --  number/char in the domain. (Look over domain and check that its mapped counterpart is in domain too)
-everyElMapped :: Eq a => [a] -> Rel a -> Bool
-everyElMapped domain rel = all checkSerial (map (\el -> getMappedRel el rel) domain)  where
+everyElMapped :: (Eq a) => [a] -> Rel a -> Bool
+everyElMapped domain rel = all checkSerial (map (\el -> getMappedRel el rel) domain)
+  where
     checkSerial [] = False
     checkSerial mapping = all (\x -> x `elem` domain) mapping
-
 
 -- ### Properties ###
 
 prop_cartProd :: (Eq a, Ord a) => [a] -> Rel a -> Property
-prop_cartProd domain relation = isSerial domain cartProd ==> True where
-  cartProd = cartesianProduct domain domain
+prop_cartProd domain relation = isSerial domain cartProd ==> True
+  where
+    cartProd = cartesianProduct domain domain
 
+-- if the domain  not empty, the domain should also not be empty and vice versa
 prop_nonEmpty :: (Eq a) => [a] -> Rel a -> Property
 prop_nonEmpty domain relation = property $ if not (null domain) then not (null relation) else null relation
 
 prop_isMapped :: (Eq a) => [a] -> Rel a -> Property
 prop_isMapped domain relation = property $ everyElMapped domain relation == isSerial domain relation
 
-prop_reflexive:: Ord a => [a] -> Property
+prop_reflexive :: (Ord a) => [a] -> Property
 prop_reflexive domain = property $ isSerial domain (getReflexive domain)
-
 
 {--
 Part 3: Discussion around modulo relation
@@ -157,28 +158,26 @@ is the proof using induction as well:
 =================== INDUCTION END ========================================
 -}
 
-
 -- Helper function to keep track of domain in recursion
-modRel :: Integral a => [a] -> [a] -> a -> Rel a
+modRel :: (Integral a) => [a] -> [a] -> a -> Rel a
 modRel _ [] _ = []
-modRel domain (x:xs) n = [(x,y) | y <- domain, isCongruent x y] ++ (modRel domain xs n) where
-            isCongruent x y = x `mod` n == y `mod` n
+modRel domain (x : xs) n = [(x, y) | y <- domain, isCongruent x y] ++ (modRel domain xs n)
+  where
+    isCongruent x y = x `mod` n == y `mod` n
 
 -- Function that gets the relation with all the 'modulo' relations in a domain for
 -- a specific n (set modulo)
-getModuloRelation :: Integral a => [a] -> a -> Rel a
+getModuloRelation :: (Integral a) => [a] -> a -> Rel a
 getModuloRelation domain n = modRel domain domain n
 
 prop_modRelationSerial :: (Integral a, Ord a) => [a] -> a -> Property
 prop_modRelationSerial domain n = property $ isSerial domain (getModuloRelation domain n)
 
-prop_domainSmallerThanRel :: Ord a => [a] -> Rel a -> Property
+prop_domainSmallerThanRel :: (Ord a) => [a] -> Rel a -> Property
 prop_domainSmallerThanRel domain relation = isSerial domain relation ==> (length domain) <= (length relation)
 
-
 main = do
-    quickCheck $ forAll genDomainRelation (uncurry prop_isMapped)
-    quickCheck $ forAll genDomainRelation (uncurry prop_nonEmpty)
-    quickCheck $ forAll genDomain prop_reflexive
-    quickCheck $ forAll genDomainAndModulo (uncurry prop_modRelationSerial)
-
+  quickCheck $ forAll genDomainRelation (uncurry prop_isMapped)
+  quickCheck $ forAll genDomainRelation (uncurry prop_nonEmpty)
+  quickCheck $ forAll genDomain prop_reflexive
+  quickCheck $ forAll genDomainAndModulo (uncurry prop_modRelationSerial)

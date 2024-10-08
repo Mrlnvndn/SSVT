@@ -1,9 +1,28 @@
+module Exercise2 where
+
 import Data.List
 import Data.Semigroup (diff)
-import Exercise1 (genRandSet, genQuickCheckSet)
+import Exercise1 (genQuickCheckSet, genRandSet)
 import SetOrd
 import System.Random
 import Test.QuickCheck
+
+{-
+For the definitions of the set functions, we extract the list from the Set, use the existing list operators in Haskell
+and then transform it back into a set using list2set
+
+We came up with one general property, which should hold for all three set function namely that 1. no duplicates shoudld exists after the function
+
+For the intersect function whe want 1. the resulting set to be equal or smaller in size and 2. every element in the resulting set should exist
+in the two original sets
+
+For union the resulting set should 1. be equal or larger and 2. all elements from the original two sets should exist in the resulting set
+
+For set difference the resulting set should 1. be equal to or smaller than the first original set and 2. all elements in the resulting set should
+not exist in the second original set
+
+We tested each property for each function using both quickcheck and our own implementation
+-}
 
 -- Time spent: 120 min
 
