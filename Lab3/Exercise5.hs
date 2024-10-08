@@ -3,12 +3,15 @@ import Data.List
 import System.Random
 import Test.QuickCheck
 import SetOrd ( Set(..), unionSet )
+import Exercise4 (genDomainRelation)
 
+
+-- Time Spent: 45 Minutes
 
 {-
-    Time Spent: 45 Minutes
-    define a function that gives the transitive closure of a relation, represented as an ordered list of pairs. E.g., trClos
-    [(1,2),(2,3),(3,4)] should give [(1,2),(1,3),(1,4),(2,3),(2,4),(3,4)] .
+Exercise 5: 
+define a function that gives the transitive closure of a relation, represented as an ordered list of pairs. E.g., trClos
+[(1,2),(2,3),(3,4)] should give [(1,2),(1,3),(1,4),(2,3),(2,4),(3,4)] .
 
 -}
 
@@ -18,10 +21,8 @@ infixr 5 @@
 (@@) :: Eq a => Rel a -> Rel a -> Rel a
 r @@ s = nub [ (x,z) | (x,y) <- r, (w,z) <- s, y == w ]
 
-{-
-    trClos will be used as a helper function by applying a sorting function to the pairs of transitive closure. 
-    
--}
+
+-- trClos will be used as a helper function by applying a sorting function to the pairs of transitive closure. 
 trClos :: Ord a => Rel a -> Rel a
 trClos r = sortBy comparePairs $ trClos' r r
 
@@ -44,3 +45,7 @@ main :: IO ()
 main = do
     let rel = [(1,2),(2,3),(3,4)]
     print $ trClos rel 
+
+    (_, randRelation) <- generate (genDomainRelation)
+    putStrLn $ "Randomly generated relation:" ++ (show randRelation)
+    putStrLn $ "Gives symmetric closure: " ++ (show $ trClos randRelation)
