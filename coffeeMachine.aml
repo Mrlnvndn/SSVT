@@ -1,0 +1,58 @@
+# Set the default timeout for responses (in seconds)
+timeout 1.0
+
+# Define an external channel
+external 'controller'
+
+# Define a process describing the behavior of the coffee machine.
+process('main') {
+
+  # Define stimuli (input) and responses (output) the process can perform on
+  # this channel.
+  channel('controller') {
+    stimulus 'button_coffee'
+    stimulus 'button_tea'
+    stimulus 'button_lemonade'
+
+    response 'coffee'
+    response 'tea'
+    response 'lemonade'
+  }
+
+  # Describe the behavior of this process. Statements are read top to bottom,
+  # similar to an imperative program.
+
+  state 'start'
+  choice {
+    o {
+      receive 'button_tea'
+      goto 'tea'
+    }
+    o {
+      receive 'button_coffee'
+      goto 'coffee'
+    }
+    o {
+      receive 'button_lemonade'
+      goto 'lemonade'
+    }
+  }
+  # goto 'start'
+
+  state 'tea'
+  send 'tea'
+  goto 'start'
+
+  state 'coffee'
+  send 'coffee'
+  goto 'start'
+
+  state 'lemonade'
+  send 'lemonade'
+  goto 'start'
+}
+
+# Tea and coffee button works as expected
+# Lemonade works when it is the first button pressed 
+# If it is pressed after the another button, it will return what the 
+# previous button will normally return
