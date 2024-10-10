@@ -4,7 +4,8 @@ import LTS
 import Data.List
 import qualified Data.Map as Map
 import Test.QuickCheck
-import Control.Monad (liftM2)
+import Control.Monad (liftM2, join)
+import Exercise2(ltsGen)
 
 
 {-
@@ -72,7 +73,16 @@ straces model = do
     deltas <- insertRandomDeltas ts
     return (ts ++ deltas)
 
+
+genRandomStraces :: Gen [Trace]
+genRandomStraces = join $ straces <$> ltsGen
+
 main = do
     res <- generate (straces coffeeModel4)
     let result = take 30 res
+    putStrLn "Generated first 30 straces for coffeModel4:"
     print result
+
+    putStrLn "Generated first 20 traces for randomly generated iolts:"
+    resGenerated <- generate genRandomStraces
+    print (take 20 resGenerated)
