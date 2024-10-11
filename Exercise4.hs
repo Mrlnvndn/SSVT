@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 module Exercise4 where
 
 import Data.List
@@ -94,3 +95,6 @@ main = do
     putStrLn "Testing the 'after' function with straces:"
     result <- generate (verifyWithStraces exampleIOLTS)
     print result
+=======
+
+>>>>>>> Stashed changes
