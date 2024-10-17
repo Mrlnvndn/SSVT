@@ -134,45 +134,45 @@ doorImpl1 0 "close" = (1, "closed")
 doorImpl1 1 "open" = (0, "opened")
 doorImpl1 1 "lock" = (2, "locked")
 doorImpl1 2 "unlock" = (1, "unlocked")
-doorImpl1 q l = error $ "Invalid command and/or state!"
+doorImpl1 q l = error $ "Invalid command and/or state!\n"
       ++ "State provided: " ++ show q
-      ++ "Label provided: " ++ show l
+      ++ "\nLabel provided: " ++ show l
 
 doorImpl2 :: State -> Label -> (State, Label)
 doorImpl2 0 "close" = (1, "opened")
 doorImpl2 1 "open" = (0, "closed")
 doorImpl2 1 "lock" = (2, "locked")
 doorImpl2 2 "unlock" = (1, "unlocked")
-doorImpl2 q l = error $ "Invalid command and/or state!"
+doorImpl2 q l = error $ "Invalid command and/or state!\n"
       ++ "State provided: " ++ show q
-      ++ "Label provided: " ++ show l
+      ++ "\nLabel provided: " ++ show l
 
 doorImpl3 :: State -> Label -> (State, Label)
 doorImpl3 0 "close" = (1, "closed")
 doorImpl3 1 "open" = (0, "opened")
 doorImpl3 1 "lock" = (2, "locked")
 doorImpl3 2 "unlock" = (2, "unlocked")
-doorImpl3 q l = error $ "Invalid command and/or state!"
+doorImpl3 q l = error $ "Invalid command and/or state!\n"
       ++ "State provided: " ++ show q
-      ++ "Label provided: " ++ show l
+      ++ "\nLabel provided: " ++ show l
 
 doorImpl4 :: State -> Label -> (State, Label)
 doorImpl4 0 "close" = (1, "closed")
 doorImpl4 1 "open" = (0, "opened")
 doorImpl4 1 "unlock" = (2, "locked")
 doorImpl4 2 "lock" = (1, "unlocked")
-doorImpl4 q l = error $ "Invalid command and/or state!"
+doorImpl4 q l = error $ "Invalid command and/or state!\n"
       ++ "State provided: " ++ show q
-      ++ "Label provided: " ++ show l
+      ++ "\nLabel provided: " ++ show l
 
 doorImpl5 :: State -> Label -> (State, Label)
 doorImpl5 0 "close" = (1, "closed")
 doorImpl5 1 "open" = (0, "open")
 doorImpl5 1 "lock" = (2, "locked")
 doorImpl5 2 "unlock" = (1, "unlocked")
-doorImpl5 q l = error $ "Invalid command and/or state!"
+doorImpl5 q l = error $ "Invalid command and/or state!\n"
       ++ "State provided: " ++ show q
-      ++ "Label provided: " ++ show l
+      ++ "\nLabel provided: " ++ show l
 
 doorImpl6 :: State -> Label -> (State, Label)
 doorImpl6 0 "close" = (1, "closed")
@@ -185,9 +185,9 @@ doorImpl6 1 "lock" = (2, "locked")
 doorImpl6 4 "lock" = (2, "locked")
 doorImpl6 6 "lock" = (2, "locked")
 doorImpl6 2 "unlock" = (1, "unlocked")
-doorImpl6 q l = error $ "Invalid command and/or state!"
+doorImpl6 q l = error $ "Invalid command and/or state!\n"
       ++ "State provided: " ++ show q
-      ++ "Label provided: " ++ show l
+      ++ "\nLabel provided: " ++ show l
 
 doorImpl7 :: State -> Label -> (State, Label)
 doorImpl7 0 "close" = (1, "closed")
@@ -200,9 +200,9 @@ doorImpl7 3 "lock" = (2, "locked")
 doorImpl7 5 "open" = (0, "opened")
 doorImpl7 5 "lock" = (6, "locked")
 doorImpl7 6 "unlock" = error $ "Incorrect keycode!"
-doorImpl7 q l = error $ "Invalid command and/or state!"
+doorImpl7 q l = error $ "Invalid command and/or state!\n"
       ++ "State provided: " ++ show q
-      ++ "Label provided: " ++ show l
+      ++ "\nLabel provided: " ++ show l
 
 doorImpl8 :: State -> Label -> (State, Label)
 doorImpl8 0 "close" = (1, "closed")
@@ -217,9 +217,9 @@ doorImpl8 5 "lock" = (2, "locked")
 doorImpl8 6 "close" = (7, "closed")
 doorImpl8 7 "lock" = (2, "locked")
 doorImpl8 7 "close" = (2, "closed")
-doorImpl8 q l = error $ "Invalid command and/or state!"
+doorImpl8 q l = error $ "Invalid command and/or state!\n"
       ++ "State provided: " ++ show q
-      ++ "Label provided: " ++ show l
+      ++ "\nLabel provided: " ++ show l
 
 nextTransitions':: [LabeledTransition]->State->[(State,Label)]
 nextTransitions' lt q0 =  [(s',l) | (s,l,s')<- lt , s == q0]
