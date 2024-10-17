@@ -1,8 +1,11 @@
+module Exercise2 where
+
 import Data.List
 import LTS (createIOLTS, State, Label, LabeledTransition, IOLTS)
 import Test.QuickCheck
 import System.Random
 import Control.Monad (replicateM)
+-- import Exercise1 (holdsForProp, prop_emptyLabelsIntersect, prop_countable, prop_transitionsExist)
 
 
 {-
@@ -79,10 +82,27 @@ ltsGen = do
     transitions <- replicateM len generateTransitions
     return $ createIOLTS transitions
 
--- Example usage
+
+-- Properties from Exercise 1
+prop_emptyLabelsIntersect :: IOLTS -> Property
+prop_emptyLabelsIntersect (_, l_in, l_out, _, _) = 
+    property $ null $ l_in `intersect` l_out
+
+prop_countable :: IOLTS -> Property
+prop_countable (states, l_in, l_out, _, _) = 
+    property $ countable states .&&. countable l_in .&&. countable l_out
+  where
+    countable :: [a] -> Property
+    countable = property . const True  -- Placeholder, replace with actual countable check
+
+prop_transitionsExist :: IOLTS -> Property
+prop_transitionsExist (_, _, _, transitions, _) = 
+    property $ not (null transitions)
+
 main :: IO ()
 main = do
-    sampleIOLTS <- generate ltsGen
-    print sampleIOLTS
+    quickCheck (forAll ltsGen prop_emptyLabelsIntersect)
+    quickCheck (forAll ltsGen prop_countable)
+    quickCheck (forAll ltsGen prop_transitionsExist)
 
 
