@@ -2,11 +2,10 @@ module Exercise1 where
 
 import LTS
 import Data.List (intersect, subsequences, union)
-import Test.FitSpec
+import Test.FitSpec ( property, (==>), Property )
 import Data.Kind (Type)
-import Data.Traversable
 
--- Time Spent: .. min
+-- Time Spent: 120 min
 
 {-
 Ex1: IOLTS validation -> ".. any verification is only as good as the validity of the model"
@@ -27,10 +26,12 @@ According to the definition by Tretmans et al.:
 
 This gives us the following conditions that lead to an invalid IOLTS
 
+### Note:
 Checking that states and labellists are countable is tricky, because inifinite lists are common in Haskell.
 Testing for this results in the Halting Problem so we cover those cases by simply counting the length
 and accepting the function will never finish if this condition is not met.
 
+### Conditions that invalidate an IOLTS
 Apart from that we get conditions:
 1. Set of states is empty
 2. tau is in L_in
@@ -41,13 +42,19 @@ Apart from that we get conditions:
 
 Q2: validateLTS implementation
 
-We wrote a function to calculate the possible transitions by creating a cartesian product between
-all states and combining this with all labels in 'possibleTransitions'.
-Then we wrote out all point in Q1 as clauses which result in False.
+We wrote a function to calculate the possible transitions by calculating the cartesian product between
+all states and combining this with all labels in 'possibleTransitions' so we get all possible transition triples.
+This is required to test #3.
+Then all conditions that invalidate an IOLTS were converted to code. If None is found we return True and an IOLTS
+is deemed valid.
 
 Q3: Create properties for validateLTS
 
-
+We created properties from the same definitions of a valid IOLTS, but they are defined the other way around:
+    i.e. we emptyLabelsIntersect to test: if intersection l_in and l_out is null then we expect the model to be valid
+        and if the model is 'valid' then the prop HAS to return true.
+They are 'the other way around' in the sense that they test the positive version instead of 'invalidating' when something
+out of line is found.
 
 
 -}
@@ -62,11 +69,13 @@ countable x = length x `seq` True
 cartProd :: Ord a => [a] -> [a] -> [(a,a)]
 cartProd xs ys = [(x,y) | x <- xs, y <- ys]
 
+-- Calculates all possible transitions given the domain of states and labels
 possibleTransitions :: [State] -> [Label] -> [LabeledTransition]
 possibleTransitions states labels = [(fst stateTrans, label, snd stateTrans)
                 | stateTrans <- cartProd states states, label <- labels]
 
 
+-- Function that validates an IOLTS using the definition by Tretmans
 validateLTS :: IOLTS -> Bool
 validateLTS ([], _, _, _, _) = False
 validateLTS (states, l_in, l_out, transitions, q_0)
@@ -81,13 +90,15 @@ validateLTS (states, l_in, l_out, transitions, q_0)
             transition `elem` (possibleTransitions states labels)
 
 
--- Helper function to defines how truth value of property and a validation should relate
+-- Helper function to define how truth value of property and a validation should relate
 -- We cannot just do ==, because there could be another part of IOLTS that invalidates the model.
+-- So this essentially means: if model is valid the prop should pass. If the prop does not pass then the model
+-- should be found to be invalid. Anything inbetween we are not sure about so we let it pass as well.
 holdsForProp :: IOLTS -> Bool -> Bool
 holdsForProp model prop = validation ==> prop && not prop ==> not validation
     where validation = validateLTS model
 
--- ## Properties ##
+-- ## Properties ## (explanation above)
 prop_emptyLabelsIntersect :: IOLTS -> Property
 prop_emptyLabelsIntersect model@(_, l_in, l_out, _, _) = property $
     holdsForProp model (null $ l_in `intersect` l_out)
