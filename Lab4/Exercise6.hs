@@ -21,7 +21,8 @@ we got the Data.Graph library, which is from a lib called 'graphite'.
 
 Somehow outputting a png did not print labels correctly,
  so instead we resorted to using plotDGraphEdged, which creates a popup.
-If you run main (or visualiseRandom) you will get a PopUp image with a rendering of the IOLTS.
+If you run main (or visualiseRandom) you will get a PopUp image with a rendering of the door model
+  below, as well as a randomly generated IOLTS model.
 
 This works quite well, but could of course be made more clear and prettier.
 However, we thought this was enough of a distraction :)
@@ -49,10 +50,11 @@ visualizeLTS lts@(_, _, _, transitions, _) =
       in void $ plotDGraphEdged graph
 
 
--- It also works for random IOLTS models, but the ones we create are not great to look at haha ;)
--- The labels are very long and consist of random strings
-visualiseRandom :: IO ()
-visualiseRandom = do
+-- It also works for random IOLTS models 
+-- The labels consist of random strings
+-- Function first generates an IOLTS, shows it and then pops up a visualisation window
+visualizeRandom :: IO ()
+visualizeRandom = do
     randomIOLTS <- generate ltsGen
     putStrLn $ "Randomly generated IOLTS: " ++ show randomIOLTS
     visualizeLTS randomIOLTS
@@ -60,7 +62,8 @@ visualiseRandom = do
 
 -- main function which calls it with our generator.
 main = do
-    putStrLn $ "Randomly generated IOLTS: " ++ show doorModel
+    putStrLn $ "### Visualise a correct door model: ###\n" ++ show doorModel
     visualizeLTS doorModel
 
-    -- visualiseRandom
+    putStrLn "### Visualise random IOLTS ###"
+    visualizeRandom
