@@ -12,12 +12,12 @@ import Control.Exception.Base (evaluate)
 import System.IO.Unsafe (unsafePerformIO)
 
 
-type Impl = State -> Label -> (State, Label)
+type Impl = State -> Label -> (State, Label) -- Type to make function definitions more clear
 
 -- Time Spent: 600 min
 
--- (This was a bit of a mess, because we tried very hard to test everything with the implementation itself.
--- This involved writing a seperate after and out and we ran into a lot of issues, because you cant see all
+-- (This was a bit of a mess initially because we tried very hard to test everything against the implementation itself.
+-- This involved writing seperate after and out functions (for Impl) and we ran into a lot of issues, because you cant see all
 -- the possible inputs and outputs of a function)
 
 {-
@@ -45,7 +45,7 @@ without running the tests:
 ## Descriptive errors and pretty printing
 The initial function along the description in the exercise we came up with was:
 ```
-oco :: IOLTS -> Impl -> Bool 
+ioco :: IOLTS -> Impl -> Bool 
 ioco model impl = do
     let implModel = implToIOLTS implStates implLabels impl
     and
@@ -58,8 +58,9 @@ ioco model impl = do
 To get more descriptive errors we used the Either monad to return True if passed or otherwise a relevant Error.
     We decided the most useful information is the trace from model that invalidates the implementation
     as well as the difference in out values between model and implementation
-Creating these functions were a lot of work, but taught is a lot about how to propagate Either and only print
+Creating these functions was a lot of work, but taught us a lot about how to propagate Either types and only print
 errors at the end.
+Also catching Errors in Haskell in a graceful way turned out to be quite tricky (more below at implementation)
 -}
 
 -- doorModel :: IOLTS
@@ -74,7 +75,10 @@ errors at the end.
 --                 (6,"!unlocked",2)]
 
 -- First we used the model above, but this meant the states did not line up with the implementations anymore
--- others suggested modeling the input and output labels on the same transitions, which made dynamically generation IOLTSs possible.
+-- others in class suggested modeling the input and output labels on the same transitions,
+--  which made dynamically generation IOLTSs easier.
+
+-- Model which defines the 'correct' benchmark model for the smartDoor
 doorModel :: IOLTS
 doorModel = createIOLTS [
                 (0,"?close", 1),
@@ -87,6 +91,7 @@ doorModel = createIOLTS [
                 (2,"!unlocked",1)]
 
 -- Dynamically create an IOLTS from an implementation (Very chuffed about this one!)
+-- Magic happens in getValidInputs, which allows us to get all outputs (and no errors) of the implementation
 implToIOLTS :: [State] -> [Label] -> Impl -> IOLTS
 implToIOLTS qs l_I impl = createIOLTS getTransitions
     where
@@ -100,13 +105,16 @@ implToIOLTS qs l_I impl = createIOLTS getTransitions
 -- Used: https://stackoverflow.com/questions/3642793/why-can-haskell-exceptions-only-be-caught-inside-the-io-monad
 getValidInputs :: [State] -> [Label] -> Impl -> [(State, Label)]
 getValidInputs qs l_I impl = [ (q, l) | q <- qs, l <- l_I,
-    let Right res = safeImpl q l, isRight (safeImpl q l)] where
+    let Right res = safeImpl q l, noError (safeImpl q l)] where -- filter out inputs that result in an error
         safeImpl s l = unsafePerformIO $ try (evaluate (impl s l)) >>= \case
             Right result -> return $ Right result
             Left (_ :: SomeException) -> return $ Left ("Error in impl function")
-        isRight (Right _) = True
-        isRight _ = False
+        noError (Right _) = True
+        noError _ = False
 
+
+
+-- ### Main functions of this exercise
 -- Out function from the description by Tretmans
 out :: IOLTS -> [State] -> [Label]
 out  _ [] = [delta]
@@ -135,10 +143,13 @@ checkTraces :: IOLTS -> IOLTS -> [Trace] -> Either String Bool
 checkTraces model implModel traces = 
     case findInvalidTrace model implModel traces of
         Nothing -> Right True
-        Just (trace, outputs, expected) -> Left $ "Invalid for trace: " ++ show trace ++ "\n\t\tbecause: " ++ show outputs ++ " was not in output options: " ++ show expected
+        Just (trace, outputs, expected) -> Left $ "Invalid for trace: " ++ show trace ++ 
+            "\n\t\tbecause: " ++ show outputs ++ " was not in output options: " ++ show expected
+
+
 
 -- ### Hard coded states and labels to check in implementation
--- Needed to get IOLTS models from implementation
+-- Needed to get IOLTS models from implementation (specific to smartDoor implementations in LTS)
 implStates :: [State]
 implStates = [0..8] -- max state of any of these implementations is 7
 
@@ -150,10 +161,12 @@ implementations = ["doorImpl" ++ show x | x <- [1..8]]
 
 -- Since a lot of the implementations have traces that keep looping, we decided to take a set number.
 nTraces :: Int
-nTraces = 1000 -- Arbitrarily decided, as this amount gives reasonable performance and we are sure all paths are walked
+nTraces = 1000 -- Arbitrarily decided, as this amount gives reasonable performance and we can be sure all paths are walked
 
 
--- ## Section to check and pretty print results for ioco of implementations
+
+
+-- ### Section to check and pretty print results for ioco of implementations
 getImplByName :: String -> Impl
 getImplByName name = case name of
     "doorImpl1" -> doorImpl1

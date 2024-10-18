@@ -1,13 +1,17 @@
 module Exercise6 where
 
-import Data.Graph.DGraph
-import Data.Graph.Visualize
-import Data.Graph.Types
-import LTS
+import Data.Graph.DGraph ( fromArcsList )
+import Data.Graph.Visualize ( plotDGraphEdged )
+import Data.Graph.Types ( Arc(Arc) )
+import LTS ( createIOLTS, IOLTS )
 import Exercise2 (ltsGen)
 import Test.QuickCheck (generate)
 import Control.Monad (void)
 
+
+-- Requirements: graphite-haskell (cabal install --lib graphite-haskell)
+-- link: https://hackage.haskell.org/package/graphite-0.10.0.1/docs/Data-Graph-Visualize.html
+-- Documentation at: https://haskell-graphite.readthedocs.io/en/latest/visualize/
 
 -- ## Indication of time spent: 50 Minutes ##
 

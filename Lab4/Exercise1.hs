@@ -2,7 +2,7 @@ module Exercise1 where
 
 import LTS
 import Data.List (intersect, subsequences, union)
-import Test.FitSpec ( property, (==>), Property )
+import Test.QuickCheck ( property, Property )
 import Data.Kind (Type)
 
 -- Time Spent: 120 min
@@ -59,6 +59,11 @@ out of line is found.
 
 -}
 
+infix 1 -->
+
+(-->) :: Bool -> Bool -> Bool
+p --> q = not p || q
+
 
 -- Checks countability by counting x :) (will loop forever if an infinite list is encountered)
 countable ::forall (t :: Type -> Type) a. Foldable t => t a -> Bool
@@ -95,7 +100,7 @@ validateLTS (states, l_in, l_out, transitions, q_0)
 -- So this essentially means: if model is valid the prop should pass. If the prop does not pass then the model
 -- should be found to be invalid. Anything inbetween we are not sure about so we let it pass as well.
 holdsForProp :: IOLTS -> Bool -> Bool
-holdsForProp model prop = validation ==> prop && not prop ==> not validation
+holdsForProp model prop = (validation --> prop) && (not prop --> not validation)
     where validation = validateLTS model
 
 -- ## Properties ## (explanation above)
