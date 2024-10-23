@@ -1,16 +1,16 @@
 {-# LANGUAGE LambdaCase #-}
-module Exercise5 where
 
-import LTS
-import Exercise4(after)
-import Exercise3 (ioTraces)
-import qualified Debug.Trace as Debug
-import Data.List ( find, nub )
-import Data.Maybe (listToMaybe)
-import Control.Exception (try, SomeException)
+module Lab4.Exercise5 where
+
+import Control.Exception (SomeException, try)
 import Control.Exception.Base (evaluate)
+import Data.List (find, nub)
+import Data.Maybe (listToMaybe)
+import Debug.Trace qualified as Debug
+import Lab4.Exercise3 (ioTraces)
+import Lab4.Exercise4 (after)
+import Lab4.LTS
 import System.IO.Unsafe (unsafePerformIO)
-
 
 type Impl = State -> Label -> (State, Label) -- Type to make function definitions more clear
 
@@ -28,7 +28,6 @@ Ultimately after starting over twice the strategy became:
     (to keep it simple we did not use straces as our version of straces function is infinite and this does not give clear errors for each implementation )
 3. Run out on the after for all the traces on the IOLTS from the impl and check for differences.
 
-
 First we look at each of the implementations to see if we can find issues
 without running the tests:
 1. This one is correct by definition (we create IOLTS model based on its behaviour)
@@ -41,15 +40,14 @@ without running the tests:
 7. When in state 6 you cannot unlock ever, because it throws an error.
 8. after trace  ["closed","locked","unlocked","opened","closed","opened","closed"]
 
-
 ## Descriptive errors and pretty printing
 The initial function along the description in the exercise we came up with was:
 ```
-ioco :: IOLTS -> Impl -> Bool 
+ioco :: IOLTS -> Impl -> Bool
 ioco model impl = do
     let implModel = implToIOLTS implStates implLabels impl
     and
-        [ 
+        [
           i `elem` (out model (model `after` traces))
         | traces <- take 10000 $ ioTraces model
         , i     <- out implModel (implModel `after` traces)
@@ -62,7 +60,6 @@ Creating these functions was a lot of work, but taught us a lot about how to pro
 errors at the end.
 Also catching Errors in Haskell in a graceful way turned out to be quite tricky (more below at implementation)
 -}
-
 -- doorModel :: IOLTS
 -- doorModel = createIOLTS [
 --                 (0,"?close", 1),
@@ -80,132 +77,136 @@ Also catching Errors in Haskell in a graceful way turned out to be quite tricky 
 
 -- Model which defines the 'correct' benchmark model for the smartDoor
 doorModel :: IOLTS
-doorModel = createIOLTS [
-                (0,"?close", 1),
-                (0,"!closed",1),
-                (1,"?open", 0),
-                (1,"!opened",0),
-                (1, "?lock", 2),
-                (1,"!locked",2),
-                (2, "?unlock", 1),
-                (2,"!unlocked",1)]
+doorModel =
+  createIOLTS
+    [ (0, "?close", 1),
+      (0, "!closed", 1),
+      (1, "?open", 0),
+      (1, "!opened", 0),
+      (1, "?lock", 2),
+      (1, "!locked", 2),
+      (2, "?unlock", 1),
+      (2, "!unlocked", 1)
+    ]
 
 -- Dynamically create an IOLTS from an implementation (Very chuffed about this one!)
 -- Magic happens in getValidInputs, which allows us to get all outputs (and no errors) of the implementation
 implToIOLTS :: [State] -> [Label] -> Impl -> IOLTS
 implToIOLTS qs l_I impl = createIOLTS getTransitions
-    where
-        getTransitions = concat [
-            [(q, "?" ++ l_in, q_next), (q, "!" ++ l_out,q_next )] |
-                (q, l_in) <- getValidInputs qs l_I impl, let (q_next, l_out) = impl q l_in]
+  where
+    getTransitions =
+      concat
+        [ [(q, "?" ++ l_in, q_next), (q, "!" ++ l_out, q_next)]
+          | (q, l_in) <- getValidInputs qs l_I impl,
+            let (q_next, l_out) = impl q l_in
+        ]
 
 -- Function that goes through all states and input labels and check whether this results in an error
 -- returns all valid input combinations (state, label)
 -- As we do not do anything with the IO monad apart from catching errors we are allowed to use unsafePerformIO
 -- Used: https://stackoverflow.com/questions/3642793/why-can-haskell-exceptions-only-be-caught-inside-the-io-monad
 getValidInputs :: [State] -> [Label] -> Impl -> [(State, Label)]
-getValidInputs qs l_I impl = [ (q, l) | q <- qs, l <- l_I,
-    let Right res = safeImpl q l, noError (safeImpl q l)] where -- filter out inputs that result in an error
-        safeImpl s l = unsafePerformIO $ try (evaluate (impl s l)) >>= \case
-            Right result -> return $ Right result
-            Left (_ :: SomeException) -> return $ Left ("Error in impl function")
-        noError (Right _) = True
-        noError _ = False
-
-
+getValidInputs qs l_I impl =
+  [ (q, l) | q <- qs, l <- l_I, let Right res = safeImpl q l, noError (safeImpl q l) -- filter out inputs that result in an error
+  ]
+  where
+    safeImpl s l =
+      unsafePerformIO $
+        try (evaluate (impl s l)) >>= \case
+          Right result -> return $ Right result
+          Left (_ :: SomeException) -> return $ Left ("Error in impl function")
+    noError (Right _) = True
+    noError _ = False
 
 -- ### Main functions of this exercise
 -- Out function from the description by Tretmans
 out :: IOLTS -> [State] -> [Label]
-out  _ [] = [delta]
+out _ [] = [delta]
 out (_, _, l_U, lt, _) qs =
-    filter (`elem` l_U) (nub outputLabels)
-    where
-        outputLabels = concat [stateOutputLabels q | q <- qs]
-        stateOutputLabels q = map snd $ nextTransitions' lt q
+  filter (`elem` l_U) (nub outputLabels)
+  where
+    outputLabels = concat [stateOutputLabels q | q <- qs]
+    stateOutputLabels q = map snd $ nextTransitions' lt q
 
 -- ioco function which either results in True or an error stating the trace that invalidates the impl
-ioco :: IOLTS -> Impl -> Either String Bool 
+ioco :: IOLTS -> Impl -> Either String Bool
 ioco model impl = do
-    let implModel = implToIOLTS implStates implLabels impl -- Dynamically convert impl to IOLTS to compare
-    checkTraces model implModel (take nTraces $ ioTraces model)
+  let implModel = implToIOLTS implStates implLabels impl -- Dynamically convert impl to IOLTS to compare
+  checkTraces model implModel (take nTraces $ ioTraces model)
 
 -- Helper functions for ioco which check individual traces
 findInvalidTrace :: IOLTS -> IOLTS -> [Trace] -> Maybe (Trace, Label, [Label])
-findInvalidTrace model implModel traces = 
-    find isInvalid invalidTraces
-    where
-        invalidTraces = [(trace, modelOuts, expectedOuts trace) | trace <- traces, modelOuts <- out implModel (implModel `after` trace)]
-        isInvalid (trace, modelOuts, expectedOuts) = not (modelOuts `elem` expectedOuts)
-        expectedOuts trace = out model (model `after` trace)
+findInvalidTrace model implModel traces =
+  find isInvalid invalidTraces
+  where
+    invalidTraces = [(trace, modelOuts, expectedOuts trace) | trace <- traces, modelOuts <- out implModel (implModel `after` trace)]
+    isInvalid (trace, modelOuts, expectedOuts) = not (modelOuts `elem` expectedOuts)
+    expectedOuts trace = out model (model `after` trace)
 
 checkTraces :: IOLTS -> IOLTS -> [Trace] -> Either String Bool
-checkTraces model implModel traces = 
-    case findInvalidTrace model implModel traces of
-        Nothing -> Right True
-        Just (trace, outputs, expected) -> Left $ "Invalid for trace: " ++ show trace ++ 
-            "\n\t\tbecause: " ++ show outputs ++ " was not in output options: " ++ show expected
-
-
+checkTraces model implModel traces =
+  case findInvalidTrace model implModel traces of
+    Nothing -> Right True
+    Just (trace, outputs, expected) ->
+      Left $
+        "Invalid for trace: "
+          ++ show trace
+          ++ "\n\t\tbecause: "
+          ++ show outputs
+          ++ " was not in output options: "
+          ++ show expected
 
 -- ### Hard coded states and labels to check in implementation
 -- Needed to get IOLTS models from implementation (specific to smartDoor implementations in LTS)
 implStates :: [State]
-implStates = [0..8] -- max state of any of these implementations is 7
+implStates = [0 .. 8] -- max state of any of these implementations is 7
 
 implLabels :: [String]
 implLabels = ["close", "open", "lock", "unlock"]
 
 implementations :: [[Char]]
-implementations = ["doorImpl" ++ show x | x <- [1..8]]
+implementations = ["doorImpl" ++ show x | x <- [1 .. 8]]
 
 -- Since a lot of the implementations have traces that keep looping, we decided to take a set number.
 nTraces :: Int
 nTraces = 1000 -- Arbitrarily decided, as this amount gives reasonable performance and we can be sure all paths are walked
 
-
-
-
 -- ### Section to check and pretty print results for ioco of implementations
 getImplByName :: String -> Impl
 getImplByName name = case name of
-    "doorImpl1" -> doorImpl1
-    "doorImpl2" -> doorImpl2
-    "doorImpl3" -> doorImpl3
-    "doorImpl4" -> doorImpl4
-    "doorImpl5" -> doorImpl5
-    "doorImpl6" -> doorImpl6
-    "doorImpl7" -> doorImpl7
-    "doorImpl8" -> doorImpl8
-    _           -> error "Unknown implementation"
+  "doorImpl1" -> doorImpl1
+  "doorImpl2" -> doorImpl2
+  "doorImpl3" -> doorImpl3
+  "doorImpl4" -> doorImpl4
+  "doorImpl5" -> doorImpl5
+  "doorImpl6" -> doorImpl6
+  "doorImpl7" -> doorImpl7
+  "doorImpl8" -> doorImpl8
+  _ -> error "Unknown implementation"
 
 -- Function that checks all implementations by name and returns the name
 -- combined with either True or the relevant Error
 checkImplementations :: [String] -> IOLTS -> [(String, Either String Bool)]
 checkImplementations impls model = map checkImpl impls
-    where
-        checkImpl implName = (implName, model `ioco` (getImplByName implName))
-
+  where
+    checkImpl implName = (implName, model `ioco` (getImplByName implName))
 
 printResult :: (String, Either String Bool) -> IO ()
-printResult (implName, result) = 
-        case result of
-            Right True -> putStrLn $ "doorModel ioco " ++ implName ++ " ?  ==> " ++ "Pass"
-            Left err -> putStrLn $ "doorModel ioco " ++ implName ++ " ?  ==> " ++ "Fail\n ## Details ## => " ++ err
-            _ -> putStrLn $ "Implementation " ++ implName ++ " gave: Unknown result"
-
+printResult (implName, result) =
+  case result of
+    Right True -> putStrLn $ "doorModel ioco " ++ implName ++ " ?  ==> " ++ "Pass"
+    Left err -> putStrLn $ "doorModel ioco " ++ implName ++ " ?  ==> " ++ "Fail\n ## Details ## => " ++ err
+    _ -> putStrLn $ "Implementation " ++ implName ++ " gave: Unknown result"
 
 -- ### Main function which checks all implementations
 main :: IO ()
 main = do
-    let results = checkImplementations implementations doorModel
-    putStrLn $ "Checking all door implementations against doorModel:"
-    mapM_ printResult results
-
+  let results = checkImplementations implementations doorModel
+  putStrLn $ "Checking all door implementations against doorModel:"
+  mapM_ printResult results
 
 {-
 CODE GRAVEYARD to illustrate fruitless attempts to directly check with impl:
-
 
 -- Create a version of after that calculates the states for an implementation
 -- This works similar to the after function in Ex4, except for the fact an implementation
@@ -214,7 +215,7 @@ afterImpl :: Impl -> Trace -> (State, Label) -> [Label]
 afterImpl impl trace initState = [stepAfterImpl impl trace initState]
 
 stepAfterImpl :: Impl -> Trace -> (State, Label) -> Label
-stepAfterImpl impl [] prev = snd prev -- Base case when list of trace labels is empty 
+stepAfterImpl impl [] prev = snd prev -- Base case when list of trace labels is empty
 stepAfterImpl impl [inputLabel] prev = inputLabel
 stepAfterImpl impl (inputLabel:outputLabel:trace) prev
     | snd nextState /= outputLabel = error $ "Output impl: "
@@ -247,30 +248,27 @@ ioco impl model@(states, l_in, l_out, transitions, q_0) =
         initial = case listToMaybe (stateLabelsImpl impl [0] states (l_in `union` l_out)) of
                     Just x  -> x
                     Nothing -> error "Empty list: stateLabelsImpl returned an empty list"
-    in and [ 
+    in and [
             Debug.trace ("Trace: " ++ show trace) $
              Debug.trace ("after impl: " ++ show (afterImpl impl trace initial)) $
              Debug.trace ("after model: " ++ show (zip (model `after` trace) (stateLabels model $ model `after` trace))) $
              (afterImpl impl trace initial) == (stateLabels model $ model `after` trace)
            | trace <- ts ]
 
-
 testLTSAgainstSUT :: IOLTS -> Impl -> Bool
 testLTSAgainstSUT model impl = impl `ioco` model
-
 
 #### Second attempt
 showTraceState :: (State, Label) -> Label -> String
 showTraceState node action = "\nAction from node: " ++ node ++ "\nTried action: "
 
 runTraceSUT :: Impl -> Trace -> State -> Bool
-runTraceSUT impl [] _ = True -- Base case when list of trace labels is empty 
+runTraceSUT impl [] _ = True -- Base case when list of trace labels is empty
 runTraceSUT impl [l_i] q = not . null $ impl q l_i
 runTraceSUT impl (l_i:l_u:trace) q
-    | res_l /= l_u = error "Resulting label for impl does not align with next in trace.\n" ++ 
+    | res_l /= l_u = error "Resulting label for impl does not align with next in trace.\n" ++
     | otherwise = runTraceSUT impl trace res_q
         where (res_q, res_l) = impl q l_i
-
 
 testLTSAgainstSUT :: IOLTS -> Impl -> Bool
 testLTSAgainstSUT model@(states, l_in, l_out, transitions, q_0) impl =

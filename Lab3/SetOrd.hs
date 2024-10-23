@@ -1,4 +1,4 @@
-module SetOrd
+module Lab3.SetOrd
   ( Set (..),
     emptySet,
     isEmpty,

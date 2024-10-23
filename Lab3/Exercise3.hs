@@ -1,8 +1,8 @@
-module Exercise3 where
+module Lab3.Exercise3 where
 
 import Data.List
-import Exercise4 (genDomainRelation)
-import SetOrd (Set (..), unionSet)
+import Lab3.Exercise4 (genDomainRelation)
+import Lab3.SetOrd (Set (..), unionSet)
 import System.Random
 import Test.QuickCheck
 

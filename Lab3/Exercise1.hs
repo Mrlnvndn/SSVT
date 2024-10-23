@@ -1,9 +1,9 @@
-module Exercise1 where
+module Lab3.Exercise1 where
 
 import Control.Monad
 import Data.List
 import GHC.IO (liftIO)
-import SetOrd
+import Lab3.SetOrd (Set, list2set)
 import System.Random
 import Test.QuickCheck
 

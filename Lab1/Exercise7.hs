@@ -4,33 +4,34 @@ module Lab1.Exercise7 where
 import Lab1.Lecture3
 import Lab1.SetOrd
 import Data.List
-import Test.QuickCheck
+import Data.Type.Ord qualified as Gen
+import Lab1.Lecture3
+import Lab1.SetOrd
 import System.Random
-import qualified Data.Type.Ord as Gen
+import Test.QuickCheck
 
 -- Sub implementation from assignment
 sub :: Form -> Set Form
 sub (Prop x) = Set [Prop x]
 sub (Neg f) = unionSet (Set [Neg f]) (sub f)
-sub f@(Cnj [f1,f2]) = unionSet ( unionSet (Set [f]) (sub f1)) (sub f2)
-sub f@(Dsj [f1,f2]) = unionSet ( unionSet (Set [f]) (sub f1)) (sub f2)
-sub f@(Impl f1 f2) = unionSet ( unionSet (Set [f]) (sub f1)) (sub f2)
-sub f@(Equiv f1 f2) = unionSet ( unionSet (Set [f]) (sub f1)) (sub f2)
+sub f@(Cnj [f1, f2]) = unionSet (unionSet (Set [f]) (sub f1)) (sub f2)
+sub f@(Dsj [f1, f2]) = unionSet (unionSet (Set [f]) (sub f1)) (sub f2)
+sub f@(Impl f1 f2) = unionSet (unionSet (Set [f]) (sub f1)) (sub f2)
+sub f@(Equiv f1 f2) = unionSet (unionSet (Set [f]) (sub f1)) (sub f2)
 sub a = error $ "ERROR: no case for " ++ show a -- Added for debug purposes
 
---Time Spent: 400 min
+-- Time Spent: 400 min
 {--
 This exercise took forever, because it was tricky to figure out what we were supposed to test for,
 there were some struggles with generating forms to use with quickcheck and question 7.2 was a bit unclear to us.
 But we figured it out, s
 --}
 
-
 {--
 To prove sub works we adapted the approach from 'Haskell Road 7.7 for counting Connectives and Atoms.
 This chapter proves by induction that the length of the list of subformulas
 for a formula is equal to the amount of connectives + its atoms.
-Changes: we added support for Impl and Equiv as well. One issue is that when we 
+Changes: we added support for Impl and Equiv as well. One issue is that when we
 use the same Prop (or subformula) multiple times we only count it once as a subformula.
 This means our function for atomCount and conCount will be off.
 First we implemented the connective count for instance as:
@@ -69,10 +70,10 @@ conCount = lengthSet . extractCons
 atomCount :: Form -> Int
 atomCount = lengthSet . extractAtoms
 
-
 -- Getting the length of a list (because that was not provided)
 lengthSet :: Set a -> Int
-lengthSet s = length (setToList s) where
+lengthSet s = length (setToList s)
+  where
     setToList (Set xs) = xs
 
 prop_subLen :: Form -> Bool
@@ -88,8 +89,8 @@ which shows a definition from A First Course in Logic by S. Hedman:
 -- Check that: Any subformula of 𝐹 or 𝐺 is also a subformula of 𝐹 ∧ 𝐺
 prop_hedmanUnion :: Form -> Form -> Bool
 prop_hedmanUnion f1 f2 = do
-    let unionForm = Cnj [f1, f2]
-    unionSet (sub f1) (sub f2) `subSet` sub unionForm
+  let unionForm = Cnj [f1, f2]
+  unionSet (sub f1) (sub f2) `subSet` sub unionForm
 
 -- Check that: Any subformula of 𝐹 or 𝐺 is also a subformula of 𝐹 ∧ 𝐺
 prop_hedmanNegation :: Form -> Bool
@@ -99,11 +100,10 @@ prop_hedmanNegation f = sub f `subSet` sub (Neg f)
 prop_identity :: Form -> Bool
 prop_identity f = f `inSet` sub f
 
-
 {--
 Implementation of 7.2: We already had a version of nsub for sets (conCount f + atomCount f),
 but we did not feel this matched the description for 7.2
-So we created a recursive version based on the inductive proof. 
+So we created a recursive version based on the inductive proof.
 --}
 nsub :: Form -> Int
 nsub (Prop _) = 1
@@ -126,10 +126,11 @@ prop_nsubNegInduction :: Form -> Bool
 prop_nsubNegInduction f = (nsub f + 1) == nsub (Neg f)
 
 prop_nsubInduction :: Form -> Form -> Bool
-prop_nsubInduction f1 f2 = (nsub f1 + nsub f2)+ 1 == nsub (Cnj [f1, f2]) &&
-          (nsub f1 + nsub f2) + 1 == nsub (Dsj [f1, f2]) &&
-          (nsub f1 + nsub f2) + 1 == nsub (Impl f1 f2) &&
-          (nsub f1 + nsub f2) + 1 == nsub (Equiv f1 f2)
+prop_nsubInduction f1 f2 =
+  (nsub f1 + nsub f2) + 1 == nsub (Cnj [f1, f2])
+    && (nsub f1 + nsub f2) + 1 == nsub (Dsj [f1, f2])
+    && (nsub f1 + nsub f2) + 1 == nsub (Impl f1 f2)
+    && (nsub f1 + nsub f2) + 1 == nsub (Equiv f1 f2)
 
 {--
 ## Testing using quickcheck:
@@ -145,50 +146,49 @@ to ramp up the complexity of formulae throughout testing.
 resizeFactor :: Int
 resizeFactor = 4
 
-instance Arbitrary Form where --implementation of arbitrary for the Form data type
+instance Arbitrary Form where -- implementation of arbitrary for the Form data type
   arbitrary :: Gen Form
   arbitrary = sized $ \n ->
     if n <= 1
       then oneof [Prop <$> choose (1, 15), Prop <$> arbitrary] -- only choose 'leafs' of our formula if n is 1 or 0
       else
         oneof
-          [ Prop <$> choose (1,15)
-            , Prop <$> arbitrary
-            , Neg <$> resize (n `div` resizeFactor) arbitrary
-            , Cnj <$> vectorOf 2 (resize (n `div` resizeFactor) arbitrary) -- at least give conjunction 2 props / forms
-            , Dsj <$> vectorOf 2 (resize (n `div` resizeFactor) arbitrary) -- same for dsj
-            , Impl <$> resize (n `div` resizeFactor) arbitrary <*> resize (n `div` resizeFactor) arbitrary
-            , Equiv <$> resize (n `div` resizeFactor) arbitrary <*> resize (n `div` resizeFactor) arbitrary
+          [ Prop <$> choose (1, 15),
+            Prop <$> arbitrary,
+            Neg <$> resize (n `div` resizeFactor) arbitrary,
+            Cnj <$> vectorOf 2 (resize (n `div` resizeFactor) arbitrary), -- at least give conjunction 2 props / forms
+            Dsj <$> vectorOf 2 (resize (n `div` resizeFactor) arbitrary), -- same for dsj
+            Impl <$> resize (n `div` resizeFactor) arbitrary <*> resize (n `div` resizeFactor) arbitrary,
+            Equiv <$> resize (n `div` resizeFactor) arbitrary <*> resize (n `div` resizeFactor) arbitrary
           ]
 
 -- Generator function to get forms
 formGen :: Gen Form
 formGen = arbitrary :: Gen Form
 
-
 main = do
-    {-- Test case to understand what is going on --}
-    -- let f = Dsj [ Cnj [Prop 8, Impl (Prop 12 ) (Prop 13)], Dsj [Neg (Prop 0), Neg (Prop 0)]]
-    -- putStrLn ("Boolean Formula: " ++ show f)
-    -- putStrLn (show (conCount f) ++ "+" ++ show (atomCount f) ++ " !== " ++ show (lengthSet (sub f)))
-    -- print $ propSubLen f
+  {-- Test case to understand what is going on --}
+  -- let f = Dsj [ Cnj [Prop 8, Impl (Prop 12 ) (Prop 13)], Dsj [Neg (Prop 0), Neg (Prop 0)]]
+  -- putStrLn ("Boolean Formula: " ++ show f)
+  -- putStrLn (show (conCount f) ++ "+" ++ show (atomCount f) ++ " !== " ++ show (lengthSet (sub f)))
+  -- print $ propSubLen f
 
-    putStrLn "--- Exercise 7.1 ---"
-    putStrLn "Testing identity prop:"
-    quickCheck prop_identity
+  putStrLn "--- Exercise 7.1 ---"
+  putStrLn "Testing identity prop:"
+  quickCheck prop_identity
 
-    putStrLn "Testing negation prop:"
-    quickCheck prop_hedmanNegation
+  putStrLn "Testing negation prop:"
+  quickCheck prop_hedmanNegation
 
-    putStrLn "Testing union prop:"
-    quickCheck prop_hedmanUnion
+  putStrLn "Testing union prop:"
+  quickCheck prop_hedmanUnion
 
-    putStrLn "Testing sublength"
-    quickCheck prop_subLen
-    putStrLn "--- Exercise 7.2 ---"
-    putStrLn "Testing base case"
-    quickCheck prop_nsubBaseCase
-    putStrLn "Testing induction step negation"
-    quickCheck prop_nsubNegInduction
-    putStrLn "Testing induction step rest"
-    quickCheck prop_nsubInduction
+  putStrLn "Testing sublength"
+  quickCheck prop_subLen
+  putStrLn "--- Exercise 7.2 ---"
+  putStrLn "Testing base case"
+  quickCheck prop_nsubBaseCase
+  putStrLn "Testing induction step negation"
+  quickCheck prop_nsubNegInduction
+  putStrLn "Testing induction step rest"
+  quickCheck prop_nsubInduction

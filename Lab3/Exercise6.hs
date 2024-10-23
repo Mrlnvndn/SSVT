@@ -1,9 +1,9 @@
-module Exercise6 where
+module Lab3.Exercise6 where
 
 import Data.List
-import Exercise3 (symClos)
-import Exercise5 (comparePairs, trClos, trClos')
-import SetOrd (Set (..), list2set, unionSet)
+import Lab3.Exercise3 (symClos)
+import Lab3.Exercise5 (comparePairs, trClos, trClos')
+import Lab3.SetOrd (Set (..), list2set, unionSet)
 import System.Random
 import Test.QuickCheck
 

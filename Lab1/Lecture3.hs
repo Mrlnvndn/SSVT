@@ -19,10 +19,10 @@ infixl 1 $$
 ($$) :: a -> (a -> b) -> b
 ($$) = flip ($)
 
-update :: Eq a => (a -> b) -> (a, b) -> a -> b
+update :: (Eq a) => (a -> b) -> (a, b) -> a -> b
 update f (x, y) = \z -> if x == z then y else f z
 
-updates :: Eq a => (a -> b) -> [(a, b)] -> a -> b
+updates :: (Eq a) => (a -> b) -> [(a, b)] -> a -> b
 updates = foldl update
 
 type Var = String
@@ -101,14 +101,14 @@ fibonacci n = fibon (0, 1, n)
     fibon =
       whiler
         (\(_, _, n) -> n > 0)
-        (\(x, y, n) -> (y, x + y, n -1))
+        (\(x, y, n) -> (y, x + y, n - 1))
         (\(x, _, _) -> x)
 
 fb :: Integer -> Integer
 fb n = fb' 0 1 n
   where
     fb' x y 0 = x
-    fb' x y n = fb' y (x + y) (n -1)
+    fb' x y n = fb' y (x + y) (n - 1)
 
 fibs = 0 : 1 : zipWith (+) fibs (tail fibs)
 
@@ -129,11 +129,15 @@ instance Show Form where
   show (Cnj fs) = "*(" ++ showLst fs ++ ")"
   show (Dsj fs) = "+(" ++ showLst fs ++ ")"
   show (Impl f1 f2) =
-    "(" ++ show f1 ++ "==>"
+    "("
+      ++ show f1
+      ++ "==>"
       ++ show f2
       ++ ")"
   show (Equiv f1 f2) =
-    "(" ++ show f1 ++ "<=>"
+    "("
+      ++ show f1
+      ++ "<=>"
       ++ show f2
       ++ ")"
 

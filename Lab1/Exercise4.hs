@@ -1,5 +1,5 @@
 import Data.List
-import Lecture2
+import Lab1.Lecture2
 import System.Random
 import Test.QuickCheck
 

@@ -1,8 +1,8 @@
-module FitSpec where
+module Lab2.FitSpec where
 
+import Data.Map qualified as Map
+import Lab2.Utils (PropMap)
 import Test.FitSpec
-import Utils (PropMap)
-import qualified Data.Map as Map
 
 multiplicationTable :: Integer -> [Integer]
 multiplicationTable x = map (* x) [1 .. 10]
@@ -48,19 +48,18 @@ prop_moduloIsZero f x = x /= 0 --> all (\v -> v `mod` x == 0) (f x)
 prop_moduloIsZero' :: [Integer] -> Integer -> Bool
 prop_moduloIsZero' mutation input = input /= 0 --> all (\v -> v `mod` input == 0) mutation
 
-
-
-
 properties' = [prop_moduloIsZero', prop_linear', prop_sumIsTriangleNumberTimesInput', prop_firstElementIsInput', prop_tenElements']
 
---Properties map with mapping from function name to property
+-- Properties map with mapping from function name to property
 propMap :: PropMap
-propMap = Map.fromList 
-    [("prop_moduloIsZero", prop_moduloIsZero'),
-    ("prop_linear", prop_linear'),
-    ("prop_sumIsTriangleNumberTimesInput", prop_sumIsTriangleNumberTimesInput'),
-    ("prop_firstElementIsInput", prop_firstElementIsInput'),
-    ("prop_tenElements", prop_tenElements')]
+propMap =
+  Map.fromList
+    [ ("prop_moduloIsZero", prop_moduloIsZero'),
+      ("prop_linear", prop_linear'),
+      ("prop_sumIsTriangleNumberTimesInput", prop_sumIsTriangleNumberTimesInput'),
+      ("prop_firstElementIsInput", prop_firstElementIsInput'),
+      ("prop_tenElements", prop_tenElements')
+    ]
 
 linear :: [Integer] -> Integer -> Bool
 -- Added another base case to support empty lists created by the Mutators
