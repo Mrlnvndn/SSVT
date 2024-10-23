@@ -9,11 +9,8 @@ type RelFunc a = (Eq a => Rel a -> Bool)
 
 -- === COMPARISON ===
 
--- subsets :: [a] -> [[a]]
--- subsets [] = [[]]
--- subsets (x : xs) = subsets xs ++ map (x :) (subsets xs)
 
-
+-- Takes a domain and two properties and returns which is stronger
 comparePropsOnDomain :: Ord a => [a] -> RelFunc a -> RelFunc a -> String
 comparePropsOnDomain domain prop1 prop2 = do
   if prop1Stronger && prop2Stronger then "equivalent"
@@ -26,6 +23,17 @@ comparePropsOnDomain domain prop1 prop2 = do
     prop1Stronger = all (\r -> (prop1 r) --> (prop2 r)) (inProperty prop1)
     prop2Stronger = all (\r -> (prop2 r) --> (prop1 r)) (inProperty prop2)
 
+-- Example usage of comparePropsOnDomain from Exam 2024-1
+main :: IO ()
+main = do
+  let coreflexiveTransitive a = isCoReflexive a && isTransitive a
+
+  let asymmetricTransitive a = isAsymmetric a && isTransitive a
+
+  putStrLn $ "Test single output: " ++ comparePropsOnDomain [0..9] coreflexiveTransitive asymmetricTransitive
+  let genDomain = listOf (arbitrary :: Gen Integer) `suchThat` (\l -> length l > 2 && length l < 10)
+  let prop_incomparable domain = comparePropsOnDomain domain coreflexiveTransitive asymmetricTransitive == "incomparable"
+  quickCheck $ forAll genDomain prop_incomparable
 
 -- From Lecture 2
 compar :: [a] -> (a -> Bool) -> (a -> Bool) -> String

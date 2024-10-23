@@ -39,6 +39,15 @@ matchOutputs' (next_l:trace) state lt matchLabels
     nextStates = nextTransitions' lt state
 
 
+-- Example from 2024-1 exam
+main = do
+    let juiceLabels = ["!applejuice", "!orangejuice"]
+    let juiceImpl = ([1 .. 3], ["?apple", "?orange", "!applejuice"], [(1, "?apple", 1), (1, "?orange", 2), (2, "!applejuice", 3)], 1)
+    let juiceDispenser trace = matchOutputs trace juiceLabels juiceImpl :: Bool
+
+    juiceDispenser ["?apple", "!applejuice"] -- should be true
+
+
 
 
 
