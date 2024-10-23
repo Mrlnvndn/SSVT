@@ -1,3 +1,8 @@
+
+module Lab1.Exercise7 where
+
+import Lab1.Lecture3
+import Lab1.SetOrd
 import Data.List
 import Data.Type.Ord qualified as Gen
 import Lab1.Lecture3
