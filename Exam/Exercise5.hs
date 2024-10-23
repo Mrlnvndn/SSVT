@@ -118,6 +118,7 @@ showStrengths props subsets nMutants = do
     )
     (zip subsets strengths)
 
+-- make sure you add the defined properties here
 propsWithNames :: [(Prop, String)]
 propsWithNames =
   [ (prop_increaseAsTimeGoesUp, "prop_increaseAsTimeGoesUp'"),
