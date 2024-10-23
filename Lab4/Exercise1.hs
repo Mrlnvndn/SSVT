@@ -1,9 +1,9 @@
-module Exercise1 where
+module Lab4.Exercise1 where
 
-import LTS
-import Data.List (intersect, subsequences, union)
-import Test.QuickCheck ( property, Property )
 import Data.Kind (Type)
+import Data.List (intersect, subsequences, union)
+import Lab4.LTS
+import Test.QuickCheck (Property, property)
 
 -- Time Spent: 120 min
 
@@ -39,7 +39,6 @@ Apart from that we get conditions:
 4. q_0 is not in Q
 5. There is at least one label in both input and output set
 
-
 Q2: validateLTS implementation
 
 We wrote a function to calculate the possible transitions by calculating the cartesian product between
@@ -56,7 +55,6 @@ We created properties from the same definitions of a valid IOLTS, but they are d
 They are 'the other way around' in the sense that they test the positive version instead of 'invalidating' when something
 out of line is found.
 
-
 -}
 
 infix 1 -->
@@ -64,36 +62,35 @@ infix 1 -->
 (-->) :: Bool -> Bool -> Bool
 p --> q = not p || q
 
-
 -- Checks countability by counting x :) (will loop forever if an infinite list is encountered)
-countable ::forall (t :: Type -> Type) a. Foldable t => t a -> Bool
+countable :: forall (t :: Type -> Type) a. (Foldable t) => t a -> Bool
 countable x = length x `seq` True
 
-
 -- ## Main implementation of model validation ##
-cartProd :: Ord a => [a] -> [a] -> [(a,a)]
-cartProd xs ys = [(x,y) | x <- xs, y <- ys]
+cartProd :: (Ord a) => [a] -> [a] -> [(a, a)]
+cartProd xs ys = [(x, y) | x <- xs, y <- ys]
 
 -- Calculates all possible transitions given the domain of states and labels
 possibleTransitions :: [State] -> [Label] -> [LabeledTransition]
-possibleTransitions states labels = [(fst stateTrans, label, snd stateTrans)
-                | stateTrans <- cartProd states states, label <- labels]
-
+possibleTransitions states labels =
+  [ (fst stateTrans, label, snd stateTrans)
+    | stateTrans <- cartProd states states,
+      label <- labels
+  ]
 
 -- Function that validates an IOLTS using the definition by Tretmans
 validateLTS :: IOLTS -> Bool
 validateLTS ([], _, _, _, _) = False
 validateLTS (states, l_in, l_out, transitions, q_0)
-    | (not (countable states) || not (countable l_in) || not (countable l_out) ) = False
-    | (not $ q_0 `elem` states) = False
-    | tau `elem` l_in = False
-    | l_in `intersect` l_out /= [] = False
-    | any (\t -> not $ transitionPossible t states (l_in `union` l_out ++ [tau, delta])) transitions = False
-    | otherwise = True
-        where
-        transitionPossible transition states labels = 
-            transition `elem` (possibleTransitions states labels)
-
+  | (not (countable states) || not (countable l_in) || not (countable l_out)) = False
+  | (not $ q_0 `elem` states) = False
+  | tau `elem` l_in = False
+  | l_in `intersect` l_out /= [] = False
+  | any (\t -> not $ transitionPossible t states (l_in `union` l_out ++ [tau, delta])) transitions = False
+  | otherwise = True
+  where
+    transitionPossible transition states labels =
+      transition `elem` (possibleTransitions states labels)
 
 -- Helper function to define how truth value of property and a validation should relate
 -- We cannot just do ==, because there could be another part of IOLTS that invalidates the model.
@@ -101,38 +98,63 @@ validateLTS (states, l_in, l_out, transitions, q_0)
 -- should be found to be invalid. Anything inbetween we are not sure about so we let it pass as well.
 holdsForProp :: IOLTS -> Bool -> Bool
 holdsForProp model prop = (validation --> prop) && (not prop --> not validation)
-    where validation = validateLTS model
+  where
+    validation = validateLTS model
 
 -- ## Properties ## (explanation above)
 prop_emptyLabelsIntersect :: IOLTS -> Property
-prop_emptyLabelsIntersect model@(_, l_in, l_out, _, _) = property $
+prop_emptyLabelsIntersect model@(_, l_in, l_out, _, _) =
+  property $
     holdsForProp model (null $ l_in `intersect` l_out)
 
 prop_countable :: IOLTS -> Property
-prop_countable model@(states, l_in, l_out, _, _) = property $ 
-    holdsForProp model $ countable states && countable l_in && countable l_out
+prop_countable model@(states, l_in, l_out, _, _) =
+  property $
+    holdsForProp model $
+      countable states && countable l_in && countable l_out
 
 prop_transitionsExist :: IOLTS -> Property
-prop_transitionsExist model@(states, l_in, l_out, transitions, _) = property $
+prop_transitionsExist model@(states, l_in, l_out, transitions, _) =
+  property $
     holdsForProp model transitionsExist
-    where
-        transitionsExist =
-            all
-            (\t -> t `elem` (possibleTransitions states (l_in `union` l_out ++ [tau, delta])))
-            transitions
-
-
+  where
+    transitionsExist =
+      all
+        (\t -> t `elem` (possibleTransitions states (l_in `union` l_out ++ [tau, delta])))
+        transitions
 
 -- Make list of IOLTS models in LTS.hs
 ltsList :: [IOLTS]
-ltsList = [ counterImpl, counterModel, coffeeImpl1, coffeeModel1, coffeeImpl2, coffeeModel2, coffeeImpl3,
-    coffeeModel3, coffeeImpl4, coffeeModel4, coffeeImpl5, coffeeModel5, coffeeImpl6,coffeeModel6,
-    tretmanK2,tretmanK3,
-    tretmanI1,tretmanI2,tretmanI3,tretmanI4,
-    tretmanS1,tretmanS2,tretmanS3, tretmanS4,
-    tretmanR1,tretmanR2]
+ltsList =
+  [ counterImpl,
+    counterModel,
+    coffeeImpl1,
+    coffeeModel1,
+    coffeeImpl2,
+    coffeeModel2,
+    coffeeImpl3,
+    coffeeModel3,
+    coffeeImpl4,
+    coffeeModel4,
+    coffeeImpl5,
+    coffeeModel5,
+    coffeeImpl6,
+    coffeeModel6,
+    tretmanK2,
+    tretmanK3,
+    tretmanI1,
+    tretmanI2,
+    tretmanI3,
+    tretmanI4,
+    tretmanS1,
+    tretmanS2,
+    tretmanS3,
+    tretmanS4,
+    tretmanR1,
+    tretmanR2
+  ]
 
 main :: IO ()
 main = do
-    -- Validate all iolts models
-    mapM_ putStrLn (map (\lts -> if validateLTS lts then "Validated" else "Invalid model") ltsList)
+  -- Validate all iolts models
+  mapM_ putStrLn (map (\lts -> if validateLTS lts then "Validated" else "Invalid model") ltsList)

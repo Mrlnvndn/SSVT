@@ -1,9 +1,9 @@
-module Exercise2 where
+module Lab3.Exercise2 where
 
 import Data.List
 import Data.Semigroup (diff)
-import Exercise1 (genQuickCheckSet, genRandSet)
-import SetOrd
+import Lab3.Exercise1 (genQuickCheckSet, genRandSet)
+import Lab3.SetOrd
 import System.Random
 import Test.QuickCheck
 

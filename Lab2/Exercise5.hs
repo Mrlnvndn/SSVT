@@ -3,8 +3,8 @@
 {-# HLINT ignore "Use when" #-}
 import Control.Monad
 import Data.List
-import FitSpec
-import Mutation
+import Lab2.FitSpec
+import Lab2.Mutation
 import System.Random
 import Test.FitSpec (results)
 import Test.QuickCheck

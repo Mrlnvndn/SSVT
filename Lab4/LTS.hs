@@ -1,12 +1,18 @@
-module LTS where
+module Lab4.LTS where
+
 import Data.List
 
 -- Types
 type State = Integer
+
 type Label = String
+
 type LabeledTransition = (State, Label, State)
+
 type Trace = [Label]
+
 type LTS = ([State], [Label], [LabeledTransition], State)
+
 type IOLTS = ([State], [Label], [Label], [LabeledTransition], State)
 
 -- Symbols
@@ -19,6 +25,7 @@ delta = "delta"
 -- IOLTS's from Axini presentation
 counterImpl :: IOLTS
 counterImpl = createIOLTS [(1, "?coin", 2), (2, "!tea", 3), (2, "!coffee", 4)]
+
 counterModel :: IOLTS
 counterModel = createIOLTS [(1, "?coin", 2), (1, "?coin", 3), (2, "!tea", 4), (3, "!coffee", 5)]
 
@@ -27,31 +34,37 @@ coffeeImplSimple = createLTS [(1, "coin", 2), (2, "coffee", 3)]
 
 coffeeImpl1 :: IOLTS
 coffeeImpl1 = createIOLTS [(1, "?coin", 2), (2, "!coffee", 3)]
+
 coffeeModel1 :: IOLTS
 coffeeModel1 = createIOLTS [(1, "?coin", 2), (2, "!tea", 3), (2, "!coffee", 4)]
 
 coffeeModel2 :: IOLTS
 coffeeModel2 = createIOLTS [(1, "?coin", 2), (2, "!coffee", 3)]
+
 coffeeImpl2 :: IOLTS
 coffeeImpl2 = createIOLTS [(1, "?coin", 2), (2, "!tea", 3), (2, "!coffee", 4)]
 
 coffeeImpl3 :: IOLTS
 coffeeImpl3 = createIOLTS [(1, "?coin", 2), (2, "!coffee", 3), (1, "?button", 2), (1, "?tea", 2)]
+
 coffeeModel3 :: IOLTS
 coffeeModel3 = createIOLTS [(1, "?coin", 2), (2, "!coffee", 3)]
 
 coffeeImpl4 :: IOLTS
 coffeeImpl4 = createIOLTS [(1, "?coin", 2), (2, "!coffee", 3)]
+
 coffeeModel4 :: IOLTS
 coffeeModel4 = createIOLTS [(1, "?button", 2), (2, "!tea", 3), (1, "?coin", 4), (4, "!coffee", 5)]
 
 coffeeImpl5 :: IOLTS
 coffeeImpl5 = createIOLTS [(1, "?coin", 2), (2, "!coffee", 3), (1, "?coin", 4)]
+
 coffeeModel5 :: IOLTS
 coffeeModel5 = createIOLTS [(1, "?coin", 2), (2, "!coffee", 3)]
 
 coffeeImpl6 :: IOLTS
 coffeeImpl6 = createIOLTS [(1, "?coin", 2), (1, "?coin", 3), (3, "!coffee", 4)]
+
 coffeeModel6 :: IOLTS
 coffeeModel6 = createIOLTS [(1, "?coin", 2), (2, tau, 3), (2, "!coffee", 3)]
 
@@ -113,19 +126,23 @@ tretmanR2 = createIOLTS [(0, "?but", 1), (1, "?but", 1), (0, "?but", 2), (1, "!l
 -- Converts an LTS into an IOLTS
 createIOLTS :: [LabeledTransition] -> IOLTS
 createIOLTS transitions = (states, map tail $ filter (\x -> head x == '?') labels, map tail $ filter (\x -> head x == '!') labels, map (\(f, l, t) -> (f, makeLabel l, t)) transitionSet, initState)
-      where (states, labels, transitionSet, initState) = createLTS transitions
+  where
+    (states, labels, transitionSet, initState) = createLTS transitions
 
 makeLabel :: Label -> Label
-makeLabel x | fst == '?' || fst == '!' = tail x
-            | otherwise = x
-      where fst = head x
+makeLabel x
+  | fst == '?' || fst == '!' = tail x
+  | otherwise = x
+  where
+    fst = head x
 
 -- Creates an LTS from a list of transitions. Assumes that this list describes all states and labels, and that the lowest numbered state is the initial state.
 createLTS :: [LabeledTransition] -> LTS
-createLTS transitions = (states, filter (/= tau) $ makeSet (map (\(_,label,_) -> label) transitions), makeSet transitions, head states)
-      where states = makeSet (concatMap (\(from,_,to) -> [from, to]) transitions)
+createLTS transitions = (states, filter (/= tau) $ makeSet (map (\(_, label, _) -> label) transitions), makeSet transitions, head states)
+  where
+    states = makeSet (concatMap (\(from, _, to) -> [from, to]) transitions)
 
-makeSet :: Ord a => [a] -> [a]
+makeSet :: (Ord a) => [a] -> [a]
 makeSet = sort . nub
 
 -- Door implementations
@@ -205,16 +222,17 @@ doorImpl8 7 "lock" = (2, "locked")
 doorImpl8 7 "close" = (2, "closed")
 doorImpl8 _ _ = error "Invalid command and/or state!"
 
-nextTransitions':: [LabeledTransition]->State->[(State,Label)]
-nextTransitions' lt q0 =  [(s',l) | (s,l,s')<- lt , s == q0]
+nextTransitions' :: [LabeledTransition] -> State -> [(State, Label)]
+nextTransitions' lt q0 = [(s', l) | (s, l, s') <- lt, s == q0]
 
-findfollowingtransitions':: [LabeledTransition] -> [State] -> [Label] -> [([State],[Label])]
-findfollowingtransitions' lt st ls = [(s:st,ls++[l])| (s,l)<-nextTransitions' lt (head st)]
+findfollowingtransitions' :: [LabeledTransition] -> [State] -> [Label] -> [([State], [Label])]
+findfollowingtransitions' lt st ls = [(s : st, ls ++ [l]) | (s, l) <- nextTransitions' lt (head st)]
 
-traces':: [LabeledTransition] -> [([State],[Label])]-> [([State],[Label])]
+traces' :: [LabeledTransition] -> [([State], [Label])] -> [([State], [Label])]
 traces' lt [] = []
 traces' lt pairs = pairs ++ traces' lt next
-    where next = concatMap (uncurry $ findfollowingtransitions' lt) pairs
+  where
+    next = concatMap (uncurry $ findfollowingtransitions' lt) pairs
 
 traces :: LTS -> [Trace] -- [[Label]]
-traces (q, l, lt, q0) = nub $ map snd (traces' lt [([q0],[])])
+traces (q, l, lt, q0) = nub $ map snd (traces' lt [([q0], [])])

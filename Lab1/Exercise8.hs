@@ -1,9 +1,9 @@
 import Data.List
+import Lab1.Lecture2
+import Lab1.Lecture3
+import Lab1.SetOrd
 import System.Random
 import Test.QuickCheck
-import Lecture3
-import Lecture2
-import SetOrd
 
 {-
 Time Spent: 120 Minutes
@@ -15,16 +15,16 @@ Time Spent: 120 Minutes
 -- The list comprehension filters the outputs, by just returning the prod elements that are not prime and in this case
 -- refuting the conjecture
 counterexamples :: [([Integer], Integer)]
-counterexamples = nub [ (listPrime, prod) | n <- [1..], let listPrime = createPrimeList n, let prod = product listPrime + 1, not(isPrime prod) ]
---nub gets rid of duplicates in the list which are unwanted
+counterexamples = nub [(listPrime, prod) | n <- [1 ..], let listPrime = createPrimeList n, let prod = product listPrime + 1, not (isPrime prod)]
 
+-- nub gets rid of duplicates in the list which are unwanted
 
---Creates a list of primes using the Isprime property
+-- Creates a list of primes using the Isprime property
 createPrimeList :: Integer -> [Integer]
-createPrimeList n = [x | x <- [0..n], isPrime x]
+createPrimeList n = [x | x <- [0 .. n], isPrime x]
 
---Function checking if a number is prime
+-- Function checking if a number is prime
 isPrime :: Integer -> Bool
-isPrime n 
-    | n < 2 = False
-    |otherwise = null [x | x <- [2..n-1], n`mod`x == 0]
+isPrime n
+  | n < 2 = False
+  | otherwise = null [x | x <- [2 .. n - 1], n `mod` x == 0]

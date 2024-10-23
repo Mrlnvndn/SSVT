@@ -1,5 +1,5 @@
 import Data.List
-import Lecture3
+import Lab1.Lecture3
 
 -- Time Spent: 360 min
 

@@ -1,4 +1,4 @@
-module Exercise4 where
+module Lab3.Exercise4 where
 
 -- import Data.Set
 

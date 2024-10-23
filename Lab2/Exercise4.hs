@@ -4,8 +4,8 @@
 
 import Control.Monad
 import Data.List
-import FitSpec
-import Mutation (mutate', mutators)
+import Lab2.FitSpec
+import Lab2.Mutation (mutate', mutators)
 import System.Random
 import Test.QuickCheck
 import Test.QuickCheck.Gen (Gen, choose, vectorOf)
@@ -77,9 +77,16 @@ propsWithNames =
 showStrengths :: [[Integer] -> Integer -> Bool] -> [[([Integer] -> Integer -> Bool, String)]] -> Integer -> IO ()
 showStrengths props subsets nMutants = do
   strengths <- mapM (propStrength nMutants . map fst) subsets
-  mapM_ (\(subset, strength) -> putStrLn $
-    "Subset: " ++ show (map snd subset) ++
-    " -> Percentage of mutants killed: " ++ show strength ++ "%") (zip subsets strengths)
+  mapM_
+    ( \(subset, strength) ->
+        putStrLn $
+          "Subset: "
+            ++ show (map snd subset)
+            ++ " -> Percentage of mutants killed: "
+            ++ show strength
+            ++ "%"
+    )
+    (zip subsets strengths)
 
 getSubSets :: [([Integer] -> Integer -> Bool, String)] -> [[([Integer] -> Integer -> Bool, String)]]
 getSubSets propsWithNames = filter (not . null) (subsequences propsWithNames)
@@ -90,4 +97,3 @@ main = do
   let props = map fst propsWithNames
   let propSubsets = getSubSets propsWithNames -- Generate all non-empty subsets
   showStrengths props propSubsets nMutants
-  
