@@ -1,9 +1,11 @@
+module Lab1.Exercise8 where
+
 import Data.List
 import System.Random
 import Test.QuickCheck
-import Lecture3
-import Lecture2
-import SetOrd
+import Lab1.Lecture3
+import Lab1.Lecture2
+import Lab1.SetOrd
 
 {-
 Time Spent: 120 Minutes

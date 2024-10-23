@@ -1,4 +1,4 @@
-module Lecture3 where
+module Lab1.Lecture3 where
 
 import Data.Char
 import Data.List

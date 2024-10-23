@@ -1,8 +1,8 @@
 
 module Lab1.Exercise7 where
 
-import Lecture3
-import SetOrd
+import Lab1.Lecture3
+import Lab1.SetOrd
 import Data.List
 import Test.QuickCheck
 import System.Random
