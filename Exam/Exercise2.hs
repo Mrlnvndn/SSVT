@@ -3,6 +3,8 @@ module Exam.Exercise2 where
 import Data.List
 import Test.QuickCheck
 
+-- Note: Max Veerhoek helped us out a great deal while preparing for the exam, especially for this exercise
+
 -- == Problem 2 ==
 type Rel a = [(a, a)]
 
@@ -95,7 +97,8 @@ subsets = foldr (\x acc -> acc ++ map (x :) acc) [[]]
 isEquivalence :: (Ord a) => Rel a -> [a] -> Bool
 isEquivalence r domain = isSymmetric r && isTransitive r && isReflexive r
 
--- Create minimal equivalence by applying trClos, symClos and
+-- Create minimal equivalence by applying transitive closure, symmetric closure and reflective Closure
+-- until it does not change anymore
 minimalEquivalence :: (Ord a) => Rel a -> [a] -> Rel a
 minimalEquivalence r domain = fixpoint (trClos . symClos . (`refClos` domain)) r
   where
