@@ -20,14 +20,14 @@ coreflexiveTransitive :: Ord a => Rel a -> [a] -> Bool
 coreflexiveTransitive a d = isCoReflexive a && isTransitive a
 
 asymmetricTransitive :: Ord a => Rel a -> [a] -> Bool
-asymmetricTransitive a d = isAsymmetric a d && isTransitive a
+asymmetricTransitive a d = isAsymmetric a && isTransitive a
 
 subsets :: [a] -> [[a]]
 subsets [] = [[]]
 subsets (x : xs) = subsets xs ++ map (x :) (subsets xs)
 
-allRelationsDomain :: (Ord a) => [a] -> Rel a
-allRelationsDomain domain = nub $ [(x,y) | x <- domain, y <- domain]
+-- allRelationsDomain :: (Ord a) => [a] -> Rel a
+-- allRelationsDomain domain = nub $ [(x,y) | x <- domain, y <- domain]
 
 compareRelProps :: Ord a => [a] -> (Rel a -> [a] -> Bool) -> (Rel a -> [a] -> Bool) -> String
 compareRelProps domain prop1 prop2 =

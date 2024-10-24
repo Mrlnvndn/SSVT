@@ -48,6 +48,18 @@ type Mut = Output -> Gen Output
 -- property input: (num a, eq a) =>  a -> a -> a -> Int, returns Bool
 -- mutator input: (num a, eq a) => a, returns a
 
+
+-- Adapt this to the required input
+generateRandomInput :: IO Input
+generateRandomInput = do
+  a <- randomRIO (1, 100)
+  b <- randomRIO (1, 100)
+  c <- randomRIO (1, 100)
+  d <- randomRIO (1, 100)
+  return (a, b, c, d)
+
+-- === MUTATION FRAMEWORK ===
+
 -- Applies a mutator to a property and function under test, then returns whether the mutant is killed (False), whether it lives (True), or that the mutant did not change the output (empty list)
 mutate' :: Mut -> [Prop] -> Fut -> Input -> Gen [Bool]
 mutate' mutator props fut (input1, input2, input3, input4) = mutation >>= \mutant -> mutateOrNothing' output mutant (propertyExecutor' props mutant (input1, input2, input3, input4))
@@ -72,14 +84,6 @@ countKilled numberOfMutants listOfProperties functionUnderTest = do
       <$> generateRandomInput
   determineSurvivingMutants results
 
--- Adapt this to the required input
-generateRandomInput :: IO Input
-generateRandomInput = do
-  a <- randomRIO (1, 100)
-  b <- randomRIO (1, 100)
-  c <- randomRIO (1, 100)
-  d <- randomRIO (1, 100)
-  return (a, b, c, d)
 
 determineSurvivingMutants :: [Gen [Bool]] -> IO Int
 determineSurvivingMutants propertyPerMutant = do
